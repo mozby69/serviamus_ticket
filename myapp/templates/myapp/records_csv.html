@@ -67,10 +67,21 @@
                             <td>{{ x.grouping }}</td>
 
 
-                            <td>
+                            <td class="align-middle">
 
                                 <a class="material-symbols-outlined btn btn-success" data-bs-toggle="modal" data-bs-target="#view_qr_{{x.id}}"> wysiwyg </a>
-                                <a style="color:white;" class="material-symbols-outlined btn btn-primary" data-bs-toggle="modal" data-bs-target="#print_page{{x.id}}"> print </a>
+                                <!-- <a style="color:white;" class="material-symbols-outlined btn btn-primary" data-bs-toggle="modal" data-bs-target="#print_page{{x.id}}"> print </a> -->
+
+                                <div class="dropdown d-inline-block dropend">
+                                  <a class="btn btn-primary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Print
+                                  </a>
+                                  <ul class="dropdown-menu border-1 mt-0 shadow-sm">
+                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#choose_type{{x.id}}">For Personal Checkup</a></li>
+                                    <li><a class="dropdown-item" href="#">For Family Checkup</a></li>
+              
+                                  </ul>
+                                </div>
                             </td>
                         </tr>
                 
@@ -164,46 +175,59 @@
 
 
 
-  <!-- modal for printing -->
+  <!-- modal for recepient type -->
    <!-- modal VIEW -->
-<div class="modal fade" id="print_page{{ x.id }}" tabindex="-1" aria-labelledby="print_page{{x.id}}" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <form action="" method="post">
-      {% csrf_token %}
- 
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" style="font-weight:700;">CHOOSE RECEPIENT TYPE</h1>
+   <div class="modal fade" id="choose_type{{ x.id }}" tabindex="-1" aria-labelledby="choose_type{{x.id}}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <form action="" method="post">
+        {% csrf_token %}
+   
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" style="font-weight:700;">CHOOSE RECEPIENT TYPE</h1>
 
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" name="id" value="{{x.id}}">
-
-        <div class="container_option">
-        
-          <button class="btn btn-primary" data-bs-target="#exampleModalToggle2" data-bs-toggle="modal">For Personal Checkup</button>
-            
-          <button class="btn btn-success">For Family Checkup</button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="id" value="{{x.id}}">
+  
+          <div class="container">
           
-        <!-- <a href="{% url 'print_personal_ticket_page' %}" class="btn btn-success" target="_blank">For Personal Checkup</a>
-        <a href="{% url 'print_family_ticket_page' %}" class="btn btn-primary" target="_blank">For Family Checkup</a> -->
-        
-        
-      </div>
-      
 
-    
+        
+            <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
+              <input type="checkbox" class="btn-check" id="btncheck1" autocomplete="off">
+              <label class="btn btn-outline-primary" for="btncheck1">CONSULATION</label>
+            
+              <input type="checkbox" class="btn-check" id="btncheck2" autocomplete="off">
+              <label class="btn btn-outline-primary" for="btncheck2">LABORATORY</label>
 
+              <input type="checkbox" class="btn-check" id="btncheck3" autocomplete="off" onchange="window.open('{% url 'print_both_ticket_page' %}', '_blank')">
+
+
+              <label class="btn btn-outline-primary" for="btncheck3">BOTH</label>
+            
+            
+            </div>
+          
+          
+        </div>
+        
+
+
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+       
+        </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-     
-      </div>
+    </form>
     </div>
-  </form>
   </div>
-</div>
+
+
+
 
 
 

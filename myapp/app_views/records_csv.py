@@ -24,6 +24,9 @@ def print_personal_ticket_page(request):
 def print_family_ticket_page(request):
     return render(request, 'myapp/print_family_ticket.html')
 
+def print_both_ticket_page(request):
+    return render(request, 'myapp/print_both_ticket.html')
+
 
 
 
