@@ -1,0 +1,245 @@
+
+{% extends "myapp/base.html" %}
+{% load static %}
+{% block content %}
+
+{% include 'myapp/navbar.html' %}
+
+<link href="{% static 'css/components.css' %}" rel="stylesheet">
+<script src="{% static 'js/components.js'%}" defer></script>
+
+
+
+<style>
+.records-container{
+    margin:2rem;
+    position:relative;
+    top:2rem;
+}
+.flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem; /* Adjust space between items */
+    margin-top:2rem;
+  }
+  
+  .flex-item {
+    width: calc(50% - 1rem); /* Adjust for gap (1rem is half of 2rem) */
+    border-bottom:1px solid #5EA061;
+    padding:1rem;
+
+  }
+
+  #field_details{
+    font-weight: bolder;
+
+    font-size:1.1rem;
+  }
+  .container_option{
+    display: flex;
+    gap:1.4rem;
+  }
+</style>
+
+
+<div class="records-container">
+    <h4 style="color:#5EA061;font-weight:600;font-size:1.8rem;margin-bottom:2rem;">Pensioner List</h4>
+    <div class="table-container card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <input id="myInput" type="text" placeholder="Search.." style="margin-bottom:1.2rem;">
+                <table id="defaultdatatables" class="table table-bordered table-hover table-striped tables">
+                    <thead class="table-success">
+                        <tr>
+                            <th>NAME</th>
+                            <th>BANK</th>
+                            <th>PTYPE</th>
+                            <th>GROUPING</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable">
+                        {% for x in list_pen %}
+                        <tr>
+                            <td>{{ x.name}}</td>
+                            <td>{{ x.bank }}</td>
+                            <td>{{ x.ptype }}</td>
+                            <td>{{ x.grouping }}</td>
+
+
+                            <td>
+
+                                <a class="material-symbols-outlined btn btn-success" data-bs-toggle="modal" data-bs-target="#view_qr_{{x.id}}"> wysiwyg </a>
+                                <a style="color:white;" class="material-symbols-outlined btn btn-primary" data-bs-toggle="modal" data-bs-target="#print_page{{x.id}}"> print </a>
+                            </td>
+                        </tr>
+                
+                
+
+
+
+
+
+<!-- modal VIEW -->
+<div class="modal fade" id="view_qr_{{ x.id }}" tabindex="-1" aria-labelledby="view_qr_{{x.id}}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <form action="" method="post">
+        {% csrf_token %}
+   
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" style="font-weight:700;">PENSIONER DETAILS</h1>
+
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="id" value="{{x.id}}">
+  
+          <div class="container">
+          
+
+            <div class="flex-container">
+              <div class="flex-item">
+                <h6><span id="field_details">NAME: </span> {{ x.name }}</h6>
+              </div>
+              
+              <div class="flex-item">
+                <h6><span id="field_details">BANK: </span> {{ x.bank }}</h6>
+              </div>
+            
+              <div class="flex-item">
+                <h6><span id="field_details">ADDRESS: </span> {{ x.add1 }}</h6>
+              </div>
+            
+              <div class="flex-item">
+                <h6><span id="field_details">ADDRESS2: </span> {{ x.add2 }}</h6>
+              </div>
+
+              <div class="flex-item">
+                <h6><span id="field_details">BIRTH: </span> </span> {{ x.birth }}</h6>
+              </div>
+
+
+              <div class="flex-item">
+                <h6><span id="field_details">PTYPE: </span> </span> {{ x.ptype }}</h6>
+              </div>
+
+              <div class="flex-item">
+                <h6><span id="field_details">STATUS: </span> </span> {{ x.status }}</h6>
+              </div>
+
+
+              <div class="flex-item">
+                <h6><span id="field_details">GROUPING: </span> </span> {{ x.grouping }}</h6>
+              </div>
+
+              <div class="flex-item">
+                <h6><span id="field_details">CONMONTH: </span> </span> {{ x.conmonth }}</h6>
+              </div>
+
+
+            </div>
+            
+          
+          
+        </div>
+        
+
+      
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+       
+        </div>
+      </div>
+    </form>
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+  <!-- modal for printing -->
+   <!-- modal VIEW -->
+<div class="modal fade" id="print_page{{ x.id }}" tabindex="-1" aria-labelledby="print_page{{x.id}}" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form action="" method="post">
+      {% csrf_token %}
+ 
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" style="font-weight:700;">CHOOSE RECEPIENT TYPE</h1>
+
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" name="id" value="{{x.id}}">
+
+        <div class="container_option">
+        
+          <button class="btn btn-primary" data-bs-target="#exampleModalToggle2" data-bs-toggle="modal">For Personal Checkup</button>
+            
+          <button class="btn btn-success">For Family Checkup</button>
+          
+        <!-- <a href="{% url 'print_personal_ticket_page' %}" class="btn btn-success" target="_blank">For Personal Checkup</a>
+        <a href="{% url 'print_family_ticket_page' %}" class="btn btn-primary" target="_blank">For Family Checkup</a> -->
+        
+        
+      </div>
+      
+
+    
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+     
+      </div>
+    </div>
+  </form>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+        {% endfor %}
+        </tbody>
+        </table>
+
+            </div>
+        </div>
+
+        <div id="pagination-container">
+            <div id="pagination">
+                <div id="page-numbers"></div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+{%endblock content %}

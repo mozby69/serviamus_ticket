@@ -1,0 +1,101 @@
+.container{
+    font-family: "Rubik", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 200;
+}
+.form-container{
+
+    position:relative;
+    width:90%;
+    margin:0 auto;
+    top:2rem;
+    background-color: whitesmoke;
+    border-radius: .5rem;
+}
+/* .inner-form{
+    display: flex;
+    padding:1rem;
+    gap:3rem;
+ 
+} */
+.loan-fields{
+    display: flex;
+    padding:1rem;
+    gap:3rem;
+}
+
+.form-container .title{
+    font-family: "Rubik", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    margin-top:1rem;
+    margin-bottom:2.2rem;
+    text-align: center;
+    color:#87B889;
+
+}
+
+.form-container .title h3{
+    font-weight: bold;
+    font-size: 2rem;
+}
+#inner-form label{
+    margin-bottom: .4rem;
+    margin-left:.4rem;
+}
+.firstdiv{
+    width:16%;
+    margin-left:1rem;
+    margin-bottom: 2rem;
+}
+.firstdiv label{
+    margin-bottom: .4rem;
+    
+}
+
+/*  */
+.custom-select {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    border:2px solid #87B889;
+    border-radius: .5rem;
+    background-color: #87B889;
+    color:white;
+}
+
+.custom-select select {
+    display: inline-block;
+    width: 100%;
+    padding: 8px;
+    appearance: none; /* Remove default arrow */
+    -webkit-appearance: none; /* Remove default arrow in Safari */
+    -moz-appearance: none; /* Remove default arrow in Firefox */
+    background: none;
+    border:none;
+    border-radius: 4px;
+    padding-right: 30px; /* Space for the custom arrow */
+    background-color: #87B889;
+    color:white;
+    
+}
+
+.custom-select::after {
+    content: '>'; /* Custom arrow */
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    font-size:1.4rem;
+    font-weight: bold;
+    transform: translateY(-50%);
+    pointer-events: none; /* Prevent interaction with the arrow */
+    color: white; /* Color of the custom arrow */
+}
+
+.hidden {
+    display: none;
+}
+#inner-form .loan-fields input{
+    border-radius: .8rem;
+}
+

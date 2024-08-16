@@ -1,0 +1,112 @@
+
+{% extends "myapp/base.html" %}
+{% load static %}
+{% block content %}
+
+{% include 'myapp/navbar.html' %}
+
+<link href="{% static 'css/import.css' %}" rel="stylesheet">
+<script src="{% static 'js/sweetalert.js' %}"></script>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="section1">
+                <div class="upload-container">
+                    <div class="upload-item1">
+                        <img src="{% static 'images/import2.png' %}" id="import_pic" alt="Import">
+                    </div>
+                    <div class="upload-item2">
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="formsubmit">
+                            {{ form.as_p }}
+                        </div>
+                        {% comment %} <input type="file"> {% endcomment %}
+                        <button type="submit" class="btn btn-success">Import</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <h4 style="color:#5EA061;">Submission History</h4>
+            <div class="table-list">
+                <div class="table-container card" style="border:1px solid #5EA061;border-radius:.8rem;">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="defaultdatatables" class="table table-bordered table-hover table-striped tables">
+                                <thead class="table-success">
+                                    <tr>
+                                        <th>IMPORT DATE</th>
+                                        <th>FILE NAME</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="myTable">
+                                    {% for x in import_list %}
+                                    <tr>
+                                        <td>{{ x.import_date}}</td>
+                                        <td>{{ x.file_name }}</td>
+                                    </tr>
+                               {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+<script>
+
+ 
+    function fetch_import_successful() {
+      $.ajax({
+          url: '{% url "fetch_import_successful" %}',
+          method: 'GET',
+          dataType: 'json',
+          success: function(data) {
+              data.messages.forEach(function(message) {
+            
+                    if (message.tags.includes('success_import')) {
+                      swal({
+                          title: "Import Successfully",
+                          text: message.text,                                                                  
+                          icon: 'success',          
+                      });                                     
+                  }
+  
+                 
+                  else {
+                      swal({
+                          text: message.text,
+                          icon: 'error',
+                      });
+                  }
+              });
+          },
+  
+          error: function(error) {
+              console.error('Error fetching messages:', error);
+          },
+          complete: function() {
+              setTimeout(fetch_import_successful, 1200);
+          }
+      });
+  }
+  
+  fetch_import_successful();
+  
+  </script>
+
+
+
+{% endblock content  %}
