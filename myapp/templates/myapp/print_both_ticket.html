@@ -1,11 +1,176 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Labrator & Consulation </title>
+    <title>Laboratory & Consulation </title>
+    <style>
+        *{
+            padding:0;
+            margin:0;
+            box-sizing: border-box;
+        }
+        .ticketf{
+            font-weight: bold;
+            text-align:center;
+
+        }
+        .container-items {
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: column; /* Change to column layout */
+        font-size: 0.8rem;
+        margin:.1rem;
+        }
+
+        .row {
+        display: flex; /* Create a row for each group of items */
+        width: 100%;
+
+        }
+
+        .container-items .items {
+        text-align: center;
+        word-wrap: break-word;
+        flex: 1 1 100%; 
+        }
+    </style>
 </head>
 <body>
-    <h2>consult</h2>
+    
+
+<div class="maincontainer">
+
+       
+    <div style="margin:1rem;">
+        <form method="GET">
+            <select id="categoryfilter" name="category" style="padding:.4rem .4rem;">
+                <option value="consultation">Consultation</option>
+                <option value="laboratory">Laboratory</option>
+                <option value="both">Both</option>
+            </select>
+            <button type="submit" style="margin-left:.5rem;padding:.5rem 1.4rem;border-radius: .2rem;background-color: #5EA061;border:none;color:white;font-weight:bold;">Filter</button>
+        </form>
+    </div>
+    
+
+    {% if request.GET.category == 'consultation' %}
+
+    <div class="ticket1" style="border:1px solid black;width:12.5rem;position:relative;margin:1rem;">
+        <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # 221</p>
+        <img src="{% static 'images/ss2.png' %}" style="width:12.4rem;height:14.4rem;">
+        
+        <div class="container-items">
+            <div class="row" style="margin-bottom:.2rem;border-bottom: 1px solid black;">
+                <div class="items" style="margin-bottom:.3rem; word-wrap: break-word; word-break: break-all;">
+                    <p><span class="ticketf">NAME<br></span> {{ emp.name }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="items" style="border-right: 1px solid black;margin:.2rem .1rem;"><p><span class="ticketf">DATE ISSUED<br></span> Aug 08 2024</p></div>
+                <div class="items" style="margin:.2rem .1rem;"><p><span class="ticketf">VALID UNTIL<br></span> Sept 08 2024</p></div>
+            </div>
+        </div>
+    </div>
+    
+
+    {% elif request.GET.category == 'laboratory' %}
+    <div class="ticket1" style="border:1px solid black;width:12.5rem;position:relative;margin:1rem;">
+        <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # 221</p>
+       <img src="{% static 'images/ss1.png' %}" style="width:12.4rem;height:14.4rem;">
+        
+       <div class="container-items">
+        <div class="row" style="margin-bottom:.2rem;border-bottom: 1px solid black;">
+          <div class="items" style="margin-bottom:.3rem;word-wrap: break-word;word-break:break-all;"><p><span class="ticketf">NAME<br></span> {{emp.name}}</p></div>
+        </div>
+        <div class="row">
+          <div class="items" style="border-right: 1px solid black;margin:.2rem .1rem;"><p><span class="ticketf">DATE ISSUED<br></span> Aug 08 2024</p></div>
+          <div class="items" style="margin:.2rem .1rem;"><p><span class="ticketf">VALID UNTIL<br></span> Sept 08 2024</p></div>
+        </div>
+      </div>
+
+     
+    </div>
+
+    {% elif request.GET.category == 'both' %}
+    <div style="display: flex;">
+
+   
+    <div class="ticket1" style="border:1px solid black;width:12.5rem;position:relative;margin:1rem;">
+        <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # 221</p>
+       <img src="{% static 'images/ss1.png' %}" style="width:12.4rem;height:14.4rem;">
+        
+       <div class="container-items">
+        <div class="row" style="margin-bottom:.2rem;border-bottom: 1px solid black;">
+          <div class="items" style="margin-bottom:.3rem;word-wrap: break-word;word-break:break-all;"><p><span class="ticketf">NAME<br></span> {{ emp.name }} </p></div>
+        </div>
+        <div class="row">
+          <div class="items" style="border-right: 1px solid black;margin:.2rem .1rem;"><p><span class="ticketf">DATE ISSUED<br></span> Aug 08 2024</p></div>
+          <div class="items" style="margin:.2rem .1rem;"><p><span class="ticketf">VALID UNTIL<br></span> Sept 08 2024</p></div>
+        </div>
+      </div>
+
+     
+    </div>
+
+    <div class="ticket1" style="border:1px solid black;width:12.5rem;position:relative;margin:1rem;">
+        <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # 221</p>
+       <img src="{% static 'images/ss2.png' %}" style="width:12.4rem;height:14.4rem;">
+        
+       <div class="container-items">
+        <div class="row" style="margin-bottom:.2rem;border-bottom: 1px solid black;">
+          <div class="items" style="margin-bottom:.3rem;word-wrap: break-word;word-break:break-all;"><p><span class="ticketf">NAME<br></span> {{ emp.name }}</p></div>
+        </div>
+        <div class="row">
+          <div class="items" style="border-right: 1px solid black;margin:.2rem .1rem;"><p><span class="ticketf">DATE ISSUED<br></span> Aug 08 2024</p></div>
+          <div class="items" style="margin:.2rem .1rem;"><p><span class="ticketf">VALID UNTIL<br></span> Sept 08 2024</p></div>
+        </div>
+      </div>
+
+     
+    </div>
+
+
+</div>
+    
+
+
+
+
+    {% else %}
+    <div class="ticket1" style="border:1px solid black;width:12.5rem;position:relative;margin:1rem;">
+        <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # 221</p>
+       <img style="width:12.4rem;height:14.4rem;">
+        
+       <div class="container-items">
+        <div class="row" style="margin-bottom:.2rem;border-bottom: 1px solid black;">
+          <div class="items" style="margin-bottom:.3rem;"><p><span class="ticketf">NAME<br></span> {{ emp.name }}</p></div>
+        </div>
+        <div class="row">
+          <div class="items" style="border-right: 1px solid black;margin:.2rem .1rem;"><p><span class="ticketf">DATE ISSUED<br></span> Aug 08 2024</p></div>
+          <div class="items" style="margin:.2rem .1rem;"><p><span class="ticketf">VALID UNTIL<br></span> Sept 08 2024</p></div>
+        </div>
+      </div>
+
+     
+    </div>
+
+    {% endif %}
+
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
 </body>
 </html>

@@ -77,8 +77,8 @@
                                     Print
                                   </a>
                                   <ul class="dropdown-menu border-1 mt-0 shadow-sm">
-                                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#choose_type{{x.id}}">For Personal Checkup</a></li>
-                                    <li><a class="dropdown-item" href="#">For Family Checkup</a></li>
+                                    <li><a class="dropdown-item"  href="{% url 'print_both_ticket_page' x.id %}" target="_blank">For Personal Checkup</a></li>
+                                    <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#family_type{{x.id}}">For Family Checkup</a></li>
               
                                   </ul>
                                 </div>
@@ -177,56 +177,50 @@
 
   <!-- modal for recepient type -->
    <!-- modal VIEW -->
-   <div class="modal fade" id="choose_type{{ x.id }}" tabindex="-1" aria-labelledby="choose_type{{x.id}}" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <form action="" method="post">
+   <div class="modal fade" id="family_type{{ x.id }}" tabindex="-1" aria-labelledby="family_type{{ x.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+      <form action="{% url 'records_csv_page' %}" method="post">
         {% csrf_token %}
-   
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" style="font-weight:700;">CHOOSE RECEPIENT TYPE</h1>
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" style="font-weight:700;">Fill Out the Details</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" name="id" value="{{ x.id }}">
+            <div class="container">
+              <div class="">
+                <label for="endorsed_to" style="margin-bottom:.4rem;">Endorsed to</label>
+                <input type="text" class="form-control" id="endorsed_to" name="endorsed_to">
+              </div>
 
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <input type="hidden" name="id" value="{{x.id}}">
-  
-          <div class="container">
-          
+              <div class="">
+                <label for="relationship" style="margin-bottom:.4rem;margin-top:.4rem;">Relationship</label>
+                <input type="text" class="form-control" id="relationship" name="relationship">
+              </div>
 
-        
-            <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
-              <input type="checkbox" class="btn-check" id="btncheck1" autocomplete="off">
-              <label class="btn btn-outline-primary" for="btncheck1">CONSULATION</label>
-            
-              <input type="checkbox" class="btn-check" id="btncheck2" autocomplete="off">
-              <label class="btn btn-outline-primary" for="btncheck2">LABORATORY</label>
+              <div class="" style="display:none;">
+                <label for="name" style="margin-bottom:.4rem;margin-top:.4rem;">name</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ x.name }}">
+              </div>
 
-              <input type="checkbox" class="btn-check" id="btncheck3" autocomplete="off" onchange="window.open('{% url 'print_both_ticket_page' %}', '_blank')">
+              <div class="" style="display:none;">
+                <label for="csv_id" style="margin-bottom:.4rem;margin-top:.4rem;">name</label>
+                <input type="text" class="form-control" id="csv_id" name="csv_id" value="{{ x.csv_id }}">
+              </div>
 
 
-              <label class="btn btn-outline-primary" for="btncheck3">BOTH</label>
-            
-            
+
             </div>
-          
-          
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary" name="save_family">Save</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
         </div>
-        
-
-
-
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-       
-        </div>
-      </div>
-    </form>
+      </form>
     </div>
-  </div>
-
-
+</div>
 
 
 

@@ -13,6 +13,6 @@ urlpatterns = [
     path('print_personal_ticket',records_csv.print_personal_ticket_page, name="print_personal_ticket_page"),
     path('pdf_view/',records_csv.pdf_view, name="pdf_view"),
     path('print_family',records_csv.print_family_ticket_page, name="print_family_ticket_page"),
-    path('print_both_ticket_page/',records_csv.print_both_ticket_page,name="print_both_ticket_page"),
+    path('print_both_ticket_page/<int:pk>/',records_csv.print_both_ticket_page,name="print_both_ticket_page"),
     
     ]
