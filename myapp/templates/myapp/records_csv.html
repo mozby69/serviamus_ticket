@@ -69,17 +69,21 @@
 
                             <td class="align-middle">
 
-                                <a class="material-symbols-outlined btn btn-success" data-bs-toggle="modal" data-bs-target="#view_qr_{{x.id}}"> wysiwyg </a>
+                                <a class="material-symbols-outlined btn btn-success btn_ssp_view" data-ssp-id="{{ x.id }}"> wysiwyg </a>
                                 <!-- <a style="color:white;" class="material-symbols-outlined btn btn-primary" data-bs-toggle="modal" data-bs-target="#print_page{{x.id}}"> print </a> -->
-
+                             
                                 <div class="dropdown d-inline-block dropend">
                                   <a class="btn btn-primary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     Print
                                   </a>
+
+                              
+
                                   <ul class="dropdown-menu border-1 mt-0 shadow-sm">
-                                    <li><a class="dropdown-item"  href="{% url 'print_both_ticket_page' x.id %}" target="_blank">For Personal Checkup</a></li>
-                                    <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#family_type{{x.id}}">For Family Checkup</a></li>
-              
+                                    <li><a class="dropdown-item btn_personal_checkup" data-ssp-id="{{ x.csv_id }}">For Personal Checkup</a></li>
+                                    <li><a class="dropdown-item btn_family_checkup" data-ssp-id="{{ x.csv_id }}">For Family Checkup</a></li>
+                                    {% comment %} <li><a class="dropdown-item"  href="{% url 'print_family_ticket_page' x.csv_id %}" target="_blank">View Family Ticket</a></li>
+                                    <li><a class="dropdown-item"  href="{% url 'print_ssp_ticket_page' x.csv_id %}" target="_blank">View SSP Ticket</a></li> {% endcomment %}
                                   </ul>
                                 </div>
                             </td>
@@ -87,86 +91,98 @@
                 
                 
 
+                        {% endfor %}
+
+
+
+
+                      </tbody>
+                      </table>
 
 
 
 
 <!-- modal VIEW -->
-<div class="modal fade" id="view_qr_{{ x.id }}" tabindex="-1" aria-labelledby="view_qr_{{x.id}}" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <form action="" method="post">
-        {% csrf_token %}
-   
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" style="font-weight:700;">PENSIONER DETAILS</h1>
+<!-- modal VIEW -->
+<div class="modal fade" id="view_ssp_modal" tabindex="-1" aria-labelledby="view_ssp_modal" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <form action="" method="post">
+      {% csrf_token %}
+ 
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" style="font-weight:700;">PENSIONER DETAILS</h1>
 
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <input type="hidden" name="id" value="{{x.id}}">
-  
-          <div class="container">
-          
-
-            <div class="flex-container">
-              <div class="flex-item">
-                <h6><span id="field_details">NAME: </span> {{ x.name }}</h6>
-              </div>
-              
-              <div class="flex-item">
-                <h6><span id="field_details">BANK: </span> {{ x.bank }}</h6>
-              </div>
-            
-              <div class="flex-item">
-                <h6><span id="field_details">ADDRESS: </span> {{ x.add1 }}</h6>
-              </div>
-            
-              <div class="flex-item">
-                <h6><span id="field_details">ADDRESS2: </span> {{ x.add2 }}</h6>
-              </div>
-
-              <div class="flex-item">
-                <h6><span id="field_details">BIRTH: </span> </span> {{ x.birth }}</h6>
-              </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
 
 
-              <div class="flex-item">
-                <h6><span id="field_details">PTYPE: </span> </span> {{ x.ptype }}</h6>
-              </div>
-
-              <div class="flex-item">
-                <h6><span id="field_details">STATUS: </span> </span> {{ x.status }}</h6>
-              </div>
-
-
-              <div class="flex-item">
-                <h6><span id="field_details">GROUPING: </span> </span> {{ x.grouping }}</h6>
-              </div>
-
-              <div class="flex-item">
-                <h6><span id="field_details">CONMONTH: </span> </span> {{ x.conmonth }}</h6>
-              </div>
-
-
-            </div>
-            
-          
-          
-        </div>
+        <div class="container">
         
 
+          <div class="flex-container">
+
+            <div class="flex-item d-flex flex-wrap">
+              <span id="field_details">NAME: &nbsp;</span><h6 id="view_name" class="mt-1"></h6>
+            </div>
+
+            <div class="flex-item d-flex">
+              <span id="field_details">ID: &nbsp;</span><h6 id="view_csv_id" class="mt-1"></h6>
+            </div>
+            
+            <div class="flex-item d-flex">
+              <span id="field_details">BANK: &nbsp;</span><h6 id="view_bank" class="mt-1"></h6>
+            </div>
+          
+            <div class="flex-item d-flex flex-wrap">
+              <span id="field_details">ADDRESS1: &nbsp;</span><h6 id="view_add1" class="mt-1"></h6>
+            </div>
+          
+            <div class="flex-item d-flex flex-wrap">
+              <span id="field_details">ADDRESS2: &nbsp;</span><h6 id="view_add2" class="mt-1"></h6>
+            </div>
+
+            <div class="flex-item d-flex">
+              <span id="field_details">BIRTH: &nbsp;</span><h6 id="view_birth" class="mt-1"></h6>
+            </div>
+
+            <div class="flex-item d-flex">
+              <span id="field_details">PTYPE: &nbsp;</span><h6 id="view_ptype" class="mt-1"></h6>
+            </div>
+
+            <div class="flex-item d-flex">
+              <span id="field_details">STATUS: &nbsp;</span><h6 id="view_status" class="mt-1"></h6>
+            </div>
+
+
+            <div class="flex-item d-flex">
+              <span id="field_details">GROUPING: &nbsp;</span><h6 id="view_grouping" class="mt-1"></h6>
+            </div>
+
+            <div class="flex-item d-flex">
+              <span id="field_details">CONMONTH: &nbsp;</span><h6 id="view_conmonth" class="mt-1"></h6>
+            </div>
+
+
+          </div>
+          
+        
+        
+      </div>
       
 
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-       
-        </div>
+    
+
       </div>
-    </form>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+     
+      </div>
     </div>
+  </form>
   </div>
+</div>
 
 
 
@@ -175,50 +191,37 @@
 
 
 
-  <!-- modal for recepient type -->
+
+  <!-- modal for FAMILY TYPE -->
    <!-- modal VIEW -->
-   <div class="modal fade" id="family_type{{ x.id }}" tabindex="-1" aria-labelledby="family_type{{ x.id }}" aria-hidden="true">
+   <div class="modal fade" id="family_type_modal" tabindex="-1" aria-labelledby="family_type_modal" aria-hidden="true">
     <div class="modal-dialog">
-      <form action="{% url 'records_csv_page' %}" method="post">
-        {% csrf_token %}
-        <div class="modal-content">
-          <div class="modal-header">
-            <h1 class="modal-title fs-5" style="font-weight:700;">Fill Out the Details</h1>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <input type="hidden" name="id" value="{{ x.id }}">
-            <div class="container">
-              <div class="">
-                <label for="endorsed_to" style="margin-bottom:.4rem;">Endorsed to</label>
-                <input type="text" class="form-control" id="endorsed_to" name="endorsed_to">
-              </div>
-
-              <div class="">
-                <label for="relationship" style="margin-bottom:.4rem;margin-top:.4rem;">Relationship</label>
-                <input type="text" class="form-control" id="relationship" name="relationship">
-              </div>
-
-              <div class="" style="display:none;">
-                <label for="name" style="margin-bottom:.4rem;margin-top:.4rem;">name</label>
-                <input type="text" class="form-control" id="name" name="name" value="{{ x.name }}">
-              </div>
-
-              <div class="" style="display:none;">
-                <label for="csv_id" style="margin-bottom:.4rem;margin-top:.4rem;">name</label>
-                <input type="text" class="form-control" id="csv_id" name="csv_id" value="{{ x.csv_id }}">
-              </div>
-
-
-
+        <form id="familyForm" method="post">
+            {% csrf_token %}
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Fill Out the Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div id="ssp_name_family" style="text-align:center;margin-bottom:1.2rem;font-weight:bold;"></div>
+                    <div class="mb-3">
+                        <label for="endorsed_to" class="form-label">Endorsed to</label>
+                        <input type="text" class="form-control" id="endorsed_to" name="endorsed_to">
+                    </div>
+                    <div class="mb-3">
+                        <label for="relationship" class="form-label">Relationship</label>
+                        <input type="text" class="form-control" id="relationship" name="relationship">
+                    </div>
+                    <input type="hidden" id="name_family" name="name">
+                    <input type="hidden" id="csv_id_family" name="csv_id">
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" name="save_family">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
-          </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-primary" name="save_family">Save</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          </div>
-        </div>
-      </form>
+        </form>
     </div>
 </div>
 
@@ -234,10 +237,52 @@
 
 
 
+ <!-- modal for SSP TYPE -->
+   <!-- modal VIEW -->
+   <div class="modal fade" id="ssp_type" tabindex="-1" aria-labelledby="ssp_type" aria-hidden="true">
+    <div class="modal-dialog">
+      <form action="" method="post" id="familyForm" >
+        {% csrf_token %}
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" style="font-weight:700;">SSP DETAILS</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
 
-        {% endfor %}
-        </tbody>
-        </table>
+
+    
+            <div class="container">
+          
+
+              <div class="">
+                <label for="name" style="margin-bottom:.4rem;margin-top:.4rem;">NAME</label>
+                <input type="text" readonly class="form-control" id="name_ssp_type" name="name">
+              </div>
+
+              <div class="">
+                <label for="csv_id" style="margin-bottom:.4rem;margin-top:.4rem;">ID</label>
+                <input type="text" readonly class="form-control" id="csv_id_ssp_type" name="csv_id">
+              </div>
+
+
+
+            </div>
+          </div>
+          <div class="modal-footer">
+
+          <button type="submit" class="btn btn-primary" name="save_ssp">Generate Ticket</button>
+
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </form>
+    </div>
+</div>
+
+
+
+
 
             </div>
         </div>
@@ -254,10 +299,7 @@
 
 
 
-
-
-
-
+<script src="{% static 'js/modals.js' %}"></script>
 
 
 {%endblock content %}

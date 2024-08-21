@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laboratory & Consulation </title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <style>
         *{
             padding:0;
@@ -35,6 +36,14 @@
         word-wrap: break-word;
         flex: 1 1 100%; 
         }
+        @media print {
+          .no-print {
+              display: none;
+          }
+          @page {
+              margin: 0;
+          }
+      }
     </style>
 </head>
 <body>
@@ -43,7 +52,7 @@
 <div class="maincontainer">
 
        
-    <div style="margin:1rem;">
+    <div style="margin:1rem;" class="no-print">
         <form method="GET">
             <select id="categoryfilter" name="category" style="padding:.4rem .4rem;">
                 <option value="consultation">Consultation</option>
@@ -54,11 +63,12 @@
         </form>
     </div>
     
+    {% for x in list_ticket %}
 
     {% if request.GET.category == 'consultation' %}
 
     <div class="ticket1" style="border:1px solid black;width:12.5rem;position:relative;margin:1rem;">
-        <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # 221</p>
+        <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # {{ x.ticket_num_ssp }}</p>
         <img src="{% static 'images/ss2.png' %}" style="width:12.4rem;height:14.4rem;">
         
         <div class="container-items">
@@ -77,7 +87,7 @@
 
     {% elif request.GET.category == 'laboratory' %}
     <div class="ticket1" style="border:1px solid black;width:12.5rem;position:relative;margin:1rem;">
-        <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # 221</p>
+        <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # {{ x.ticket_num_ssp }}</p>
        <img src="{% static 'images/ss1.png' %}" style="width:12.4rem;height:14.4rem;">
         
        <div class="container-items">
@@ -98,7 +108,7 @@
 
    
     <div class="ticket1" style="border:1px solid black;width:12.5rem;position:relative;margin:1rem;">
-        <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # 221</p>
+        <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # {{ x.ticket_num_ssp }}</p>
        <img src="{% static 'images/ss1.png' %}" style="width:12.4rem;height:14.4rem;">
         
        <div class="container-items">
@@ -115,7 +125,7 @@
     </div>
 
     <div class="ticket1" style="border:1px solid black;width:12.5rem;position:relative;margin:1rem;">
-        <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # 221</p>
+        <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # {{ x.ticket_num_ssp }}</p>
        <img src="{% static 'images/ss2.png' %}" style="width:12.4rem;height:14.4rem;">
         
        <div class="container-items">
@@ -170,7 +180,12 @@
 
 
 
+<div style="position:relative;top:1rem;margin:1rem;" class="no-print">
+  <a href={% url 'records_csv_page' %} style="text-decoration:none;border:1px solid green;padding:.4rem .8rem;background-color:green;color:white;font-weight:bold;border-radius:.2rem;"><span class="material-symbols-outlined" style="position:relative;top:.4rem;right:.2rem;font-size:1.4rem;">arrow_back</span>back</a>
+  </div>
 
+
+{% endfor %}
 
 </body>
 </html>

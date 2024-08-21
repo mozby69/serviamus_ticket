@@ -5,6 +5,9 @@
 
 {% include 'myapp/navbar.html' %}
 
+<link href="{% static 'css/components.css' %}" rel="stylesheet">
+<script src="{% static 'js/components.js'%}" defer></script>
+
 <link href="{% static 'css/import.css' %}" rel="stylesheet">
 <script src="{% static 'js/sweetalert.js' %}"></script>
 
@@ -54,9 +57,21 @@
                             </table>
                         </div>
                     </div>
+
+                    <div id="pagination-container">
+                        <div id="pagination">
+                            <div id="page-numbers"></div>
+                        </div>
+                    </div>
+
+                    
                 </div>
             </div>
         </div>
+
+     
+
+
     </div>
 </div>
 

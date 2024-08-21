@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h2>Sample Table</h2>
+
+    <div class="table-container card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="defaultdatatables" class="table table-bordered table-hover table-striped tables">
+                    <thead class="table-success">
+                        <tr>
+                            <th>NAME</th>
+                            <th>BANK</th>
+                            <th>PTYPE</th>
+                            <th>GROUPING</th>
+                            <th>conmonth</th>
+                            <th>readyx</th>
+                            <th>STATUS</th>
+                            <th>add</th>
+                            <th>STsdfsdfATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable">
+                        {% for y in x %}
+                        <tr>
+                            <td>{{ y.name }}</td>
+                            <td>{{ y.bank }}</td>
+                            <td>{{ y.ptype }}</td>
+                            <td>{{ y.grouping }}</td>  <!-- Assuming 'grouping' is a field in your model -->
+                            <td>{{ y.conmonth }}</td>    <!-- Assuming 'action' is a field in your model -->
+                            <td>{{ y.readyx }}</td>    <!-- Assuming 'action' is a field in your model -->
+                            <td>{{ y.status }}</td>    <!-- Assuming 'action' is a field in your model -->
+                            <td>{{ y.add1 }}</td>    <!-- Assuming 'action' is a field in your model -->
+                            <td>{{ y.add2 }}</td>    <
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

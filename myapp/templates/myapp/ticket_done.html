@@ -1,0 +1,92 @@
+
+{% extends "myapp/base.html" %}
+{% load static %}
+{% block content %}
+
+{% include 'myapp/navbar.html' %}
+
+<link href="{% static 'css/components.css' %}" rel="stylesheet">
+<script src="{% static 'js/components.js'%}" defer></script>
+
+<style>
+   
+.records-container{
+    margin:2rem;
+    position:relative;
+    top:2rem;
+}
+
+
+</style>
+
+
+
+<div class="records-container">
+    <h4 style="color:#5EA061;font-weight:600;font-size:1.8rem;margin-bottom:2rem;">TICKET LIST</h4>
+    <div class="table-container card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <input id="myInput" type="text" placeholder="Search.." style="margin-bottom:1.2rem;float:right;">
+                <table id="defaultdatatables" class="table table-bordered table-hover table-striped tables">
+                    <thead class="table-success">
+                        <tr>
+                            <th>NAME</th>
+                            <th>DATE ISSUED</th>
+                            <th>VALID UNTIL</th>
+                            <th>ENDORSED TO</th>
+                            <th>RELATIONSHIP</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable">
+                        <tr class="loading">
+                            <td colspan="6">Loading tickets...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    fetchTickets();
+});
+
+function fetchTickets() {
+    $.ajax({
+        url: "{% url 'fetch_tickets' %}", 
+        type: "GET",
+        dataType: "json",
+        beforeSend: function() {
+        
+            $('#myTable').html('<tr class="loading"><td>Loading tickets...</td></tr>');
+        },
+        success: function(data) {
+           
+            $('#myTable').empty();
+
+            $.each(data, function(index, ticket) {
+                var row = $('<tr>');
+                row.append('<td>' + ticket.name + '</td>');
+                row.append('<td>' + ticket.date_issued + '</td>');
+                row.append('<td>' + ticket.valid_until + '</td>');
+                row.append('<td>' + ticket.endorsed_to + '</td>');
+                row.append('<td>' + ticket.relationship + '</td>');
+                row.append('<td><a class="material-symbols-outlined btn btn-success btn_ssp_view" data-ssp-id="{{ x.id }}"> wysiwyg </a></td>'); // Add action column logic if needed
+
+                $('#myTable').append(row);
+            });
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.error("Error fetching tickets:", textStatus, errorThrown);
+            $('#myTable').html('<tr><td>Error fetching tickets.</td></tr>');
+        }
+    });
+}
+</script>
+
+
+
+{% endblock %}
