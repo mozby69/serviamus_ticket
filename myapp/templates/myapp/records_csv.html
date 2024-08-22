@@ -78,18 +78,22 @@
                                   </a>
 
                               
-
+                          
                                   <ul class="dropdown-menu border-1 mt-0 shadow-sm">
                                     <li><a class="dropdown-item btn_personal_checkup" data-ssp-id="{{ x.csv_id }}">For Personal Checkup</a></li>
                                     <li><a class="dropdown-item btn_family_checkup" data-ssp-id="{{ x.csv_id }}">For Family Checkup</a></li>
-                                    {% comment %} <li><a class="dropdown-item"  href="{% url 'print_family_ticket_page' x.csv_id %}" target="_blank">View Family Ticket</a></li>
-                                    <li><a class="dropdown-item"  href="{% url 'print_ssp_ticket_page' x.csv_id %}" target="_blank">View SSP Ticket</a></li> {% endcomment %}
-                                  </ul>
-                                </div>
+                                 
+                                        <li><a class="dropdown-item" href="{% url 'ticket_print' x.csv_id %}" target="_blank">View ticket</a></li>
+                                
+                                        {% comment %} <li><a class="dropdown-item" href="{% url 'ticket_print_fam' x.csv_id %}" target="_blank">View fam Ticket</a></li> {% endcomment %}
+                                
+                                
+                              
+                                  </div>
                             </td>
                         </tr>
                 
-                
+       
 
                         {% endfor %}
 
@@ -213,6 +217,18 @@
                         <label for="relationship" class="form-label">Relationship</label>
                         <input type="text" class="form-control" id="relationship" name="relationship">
                     </div>
+
+                    <div class="mt-3">
+                      <label for="category" class="mb-2">CHECKUP TYPE</label>
+                      <select id="category" name="category" class="form-control" required>
+                        <option value="" disabled selected>Select a checkup type</option>
+                        <option value="consultation">Consultation</option>
+                        <option value="laboratory">Laboratory</option>
+                        <option value="both">Both</option>
+                      </select>
+                    </div>
+
+
                     <input type="hidden" id="name_family" name="name">
                     <input type="hidden" id="csv_id_family" name="csv_id">
                 </div>
@@ -265,9 +281,20 @@
                 <input type="text" readonly class="form-control" id="csv_id_ssp_type" name="csv_id">
               </div>
 
-
+              <div class="mt-3">
+                <label for="category" class="mb-2">CHECKUP TYPE</label>
+                <select id="category" name="category" class="form-control" required>
+                  <option value="" disabled selected>Select a checkup type</option>
+                  <option value="consultation">Consultation</option>
+                  <option value="laboratory">Laboratory</option>
+                  <option value="both">Both</option>
+                </select>
+              </div>
+              
+              
 
             </div>
+
           </div>
           <div class="modal-footer">
 

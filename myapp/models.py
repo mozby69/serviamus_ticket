@@ -26,9 +26,16 @@ class ticket_list(models.Model):
     valid_until = models.DateField(max_length=20,null=True,blank=True)
     endorsed_to = models.CharField(max_length=200,null=True,blank=True)
     relationship = models.CharField(max_length=200,null=True,blank=True)
-    ticket_num_ssp = models.PositiveIntegerField(unique=True, null=True, blank=True, default=None)
-    ticket_num_family = models.PositiveIntegerField(unique=True, null=True, blank=True, default=None)
+    ticket_ssp_consult = models.PositiveIntegerField(unique=True, null=True, blank=True, default=None)
+    ticket_ssp_lab = models.PositiveIntegerField(unique=True, null=True, blank=True, default=None)
+    ticket_family_consult = models.PositiveIntegerField(unique=True, null=True, blank=True, default=None)
+    ticket_family_lab = models.PositiveIntegerField(unique=True, null=True, blank=True, default=None)
+    checkup_status = models.CharField(max_length=200,default="Pending_Checkup")
+    checkup_type = models.CharField(max_length=100,null=True,blank=True)
+    recepient_type = models.CharField(max_length=100,null=True,blank=True)
 
+
+    
     # def save(self, *args, **kwargs):
     #     if not self.ticket_number:
     #         last_ticket = ticket_list.objects.all().order_by('ticket_number').last()

@@ -19,4 +19,7 @@ urlpatterns = [
     path('add_family/', records_csv.add_family, name="add_family"),
     path('fetch_tickets/',ticket_done.fetch_tickets, name="fetch_tickets"),
     path('ticket_done_page/',ticket_done.ticket_done_page, name="ticket_done_page"),
+    path('ticket_print/<int:pk>/',records_csv.ticket_print, name="ticket_print"),
+    path('ticket_print_fam/<int:pk>/',records_csv.ticket_print_fam,name="ticket_print_fam"),
+    path('save_checkup_status/',ticket_done.save_checkup_status, name="save_checkup_status"),
     ]

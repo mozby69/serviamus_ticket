@@ -9,7 +9,6 @@ from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse
 from myapp.models import import_history
 from django.contrib import messages
-from django.contrib import messages
 from django.contrib.messages import get_messages
 from django.http import JsonResponse
 

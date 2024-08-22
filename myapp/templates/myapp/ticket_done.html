@@ -35,6 +35,7 @@
                             <th>VALID UNTIL</th>
                             <th>ENDORSED TO</th>
                             <th>RELATIONSHIP</th>
+                            <th>CHECKUP STATUS</th>
                             <th>ACTION</th>
                         </tr>
                     </thead>
@@ -49,10 +50,60 @@
     </div>
 </div>
 
+
+
+
+
+
+
+
+
+
+
+<!-- modal -->
+<div class="modal fade" id="ticket_list_modal" tabindex="-1" aria-labelledby="ticket_list_modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="familyForm" method="post">
+            {% csrf_token %}
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+       
+                  <div id="display_name"></div>
+              
+
+                    <div>
+                        <label for="done_ticket" class="form-label"></label>
+                        <input type="hidden" class="form-control" id="done_ticket" name="done_ticket" value="Done_Checkup">
+                    </div>
+
+                    <!-- <input type="text" id="csv_id_tick" name="csv_id_tick" s"> -->
+
+                
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" name="save_family" id="save_ticket_done">Done checkup</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+
+<script src="{% static 'js/modals.js' %}"></script>
 <script>
-$(document).ready(function() {
-    fetchTickets();
-});
+
+    $(document).ready(function() {
+        fetchTickets();
+    });
 
 function fetchTickets() {
     $.ajax({
@@ -68,13 +119,20 @@ function fetchTickets() {
             $('#myTable').empty();
 
             $.each(data, function(index, ticket) {
+                if(ticket.checkup_status == 'Done_Checkup'){
+                    var x = "badge text-bg-success";
+                }
+                else{
+                    var x = "badge text-bg-warning";
+                }
                 var row = $('<tr>');
                 row.append('<td>' + ticket.name + '</td>');
                 row.append('<td>' + ticket.date_issued + '</td>');
                 row.append('<td>' + ticket.valid_until + '</td>');
                 row.append('<td>' + ticket.endorsed_to + '</td>');
                 row.append('<td>' + ticket.relationship + '</td>');
-                row.append('<td><a class="material-symbols-outlined btn btn-success btn_ssp_view" data-ssp-id="{{ x.id }}"> wysiwyg </a></td>'); // Add action column logic if needed
+                row.append("<td style='width:8rem;margin-left:1rem;margin-top:.6rem;padding:.8rem 1rem;' class='" + x + "'>" + ticket.checkup_status + '</td>');
+                row.append('<td><a class="material-symbols-outlined btn btn-success btn_ticket_list_done" data-ssp-id="'+ticket.csv_id+'" data-ssp-name="'+ticket.name+'"> wysiwyg </a></td>'); // Add action column logic if needed
 
                 $('#myTable').append(row);
             });

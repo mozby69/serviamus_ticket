@@ -1,0 +1,189 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratory & Consulation </title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <style>
+        *{
+            padding:0;
+            margin:0;
+            box-sizing: border-box;
+        }
+        .ticketf{
+            font-weight: bold;
+            text-align:center;
+
+        }
+        .container-items {
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: column; /* Change to column layout */
+        font-size: 0.8rem;
+        margin:.1rem;
+        }
+
+        .row {
+        display: flex; /* Create a row for each group of items */
+        width: 100%;
+
+        }
+
+        .container-items .items {
+        text-align: center;
+        word-wrap: break-word;
+        flex: 1 1 100%; 
+        }
+        @media print {
+          .no-print {
+              display: none;
+          }
+          @page {
+              margin: 0;
+          }
+      }
+    </style>
+</head>
+<body>
+    
+
+<div class="maincontainer">
+
+
+
+    {% for ticket in tickets %}
+    {% if ticket.checkup_type == 'consultation' %}
+      <div class="ticket1" style="border:1px solid black;width:12.5rem;position:relative;margin:1rem;">
+          <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # {{ ticket.ticket_ssp_consult }}</p>
+          <img src="{% static 'images/zz1.png' %}" style="width:12.4rem;height:14.4rem;">
+  
+          <div class="container-items">
+              <div class="row" style="margin-bottom:.2rem;border-bottom: 1px solid black;">
+                  <div class="items" style="margin-bottom:.3rem; word-wrap: break-word; word-break: break-all;">
+                      <p><span class="ticketf">NAME<br></span> {{ ticket.name }}</p>
+                  </div>
+              </div>
+              <div class="row">
+                  <div class="items" style="border-right: 1px solid black;margin:.2rem .1rem;"><p><span class="ticketf">DATE ISSUED<br></span> {{ current_date }}</p></div>
+                  <div class="items" style="margin:.2rem .1rem;"><p><span class="ticketf">VALID UNTIL<br></span> {{ ticket.valid_until }}</p></div>
+              </div>
+          </div>
+      </div>
+  
+    {% elif ticket.checkup_type == 'laboratory' %}
+
+      <div class="ticket1" style="border:1px solid black;width:12.5rem;position:relative;margin:1rem;">
+          <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # {{ ticket.ticket_ssp_lab }}</p>
+          <img src="{% static 'images/zz2.png' %}" style="width:12.4rem;height:14.4rem;">
+  
+          <div class="container-items">
+              <div class="row" style="margin-bottom:.2rem;border-bottom: 1px solid black;">
+                  <div class="items" style="margin-bottom:.3rem; word-wrap: break-word; word-break: break-all;">
+                      <p><span class="ticketf">NAME<br></span> {{ ticket.name }}</p>
+                  </div>
+              </div>
+              <div class="row">
+                  <div class="items" style="border-right: 1px solid black;margin:.2rem .1rem;"><p><span class="ticketf">DATE ISSUED<br></span> {{ current_date }}</p></div>
+                  <div class="items" style="margin:.2rem .1rem;"><p><span class="ticketf">VALID UNTIL<br></span> {{ ticket.valid_until }}</p></div>
+              </div>
+          </div>
+      </div>
+  
+  
+    {% elif ticket.checkup_type == 'both' %}
+
+    <div style="display:flex;">
+
+   
+        <div class="ticket1" style="border:1px solid black;width:14.5rem;position:relative;margin:1rem;">
+            <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # {{ ticket.ticket_family_consult }}</p>
+            <img src="{% static 'images/zz2.png' %}" style="width:14.4rem;height:14.4rem;">
+            
+            <div class="container-items">
+                <div class="row" style="margin-bottom:.2rem;border-bottom: 1px solid black;">
+                    <div class="items" style="margin-bottom:.3rem; word-wrap: break-word; word-break: break-all;">
+                        <p><span class="ticketf">SSP NAME<br></span> {{ ticket.name }}</p>
+                    </div>
+                    
+                </div>
+    
+                <div class="row" style="margin-bottom:.2rem;border-bottom: 1px solid black;">
+                    <div class="items" style="margin-bottom:.3rem; word-wrap: break-word; word-break: break-all;">
+                        <p><span class="ticketf">ENDORSED TO<br></span> {{ ticket.endorsed_to }}</p>
+                    </div>
+                    
+                </div>
+                
+                <div class="row" style="margin-bottom:.2rem;border-bottom: 1px solid black;">
+                    <div class="items" style="margin-bottom:.3rem; word-wrap: break-word; word-break: break-all;">
+                        <p><span class="ticketf">RELATIONSHIP<br></span> {{ ticket.relationship }}</p>
+                    </div>
+                    
+                </div>
+    
+                <div class="row">
+                    <div class="items" style="border-right: 1px solid black;margin:.2rem .1rem;"><p><span class="ticketf">DATE ISSUED<br></span>{{ ticket.date_issued }}</p></div>
+                    <div class="items" style="margin:.2rem .1rem;"><p><span class="ticketf">VALID UNTIL<br></span> {{ ticket.valid_until }}</p></div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="ticket1" style="border:1px solid black;width:14.5rem;position:relative;margin:1rem;">
+            <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # {{ ticket.ticket_family_lab }}</p>
+            <img src="{% static 'images/zz1.png' %}" style="width:14.4rem;height:14.4rem;">
+            
+            <div class="container-items">
+                <div class="row" style="margin-bottom:.2rem;border-bottom: 1px solid black;">
+                    <div class="items" style="margin-bottom:.3rem; word-wrap: break-word; word-break: break-all;">
+                        <p><span class="ticketf">SSP NAME<br></span> {{ ticket.name }}</p>
+                    </div>
+                    
+                </div>
+    
+                <div class="row" style="margin-bottom:.2rem;border-bottom: 1px solid black;">
+                    <div class="items" style="margin-bottom:.3rem; word-wrap: break-word; word-break: break-all;">
+                        <p><span class="ticketf">ENDORSED TO<br></span> {{ ticket.endorsed_to }}</p>
+                    </div>
+                    
+                </div>
+                
+                <div class="row" style="margin-bottom:.2rem;border-bottom: 1px solid black;">
+                    <div class="items" style="margin-bottom:.3rem; word-wrap: break-word; word-break: break-all;">
+                        <p><span class="ticketf">RELATIONSHIP<br></span> {{ ticket.relationship }}</p>
+                    </div>
+                    
+                </div>
+    
+                <div class="row">
+                    <div class="items" style="border-right: 1px solid black;margin:.2rem .1rem;"><p><span class="ticketf">DATE ISSUED<br></span>{{ ticket.date_issued }}</p></div>
+                    <div class="items" style="margin:.2rem .1rem;"><p><span class="ticketf">VALID UNTIL<br></span> {{ ticket.valid_until }}</p></div>
+                </div>
+            </div>
+        </div>
+
+
+</div>
+    
+
+      {% endif %}
+  {% endfor %}
+
+
+
+
+</div>
+
+
+
+
+<div style="position:relative;top:1rem;margin:1rem;" class="no-print">
+  <a href={% url 'records_csv_page' %} style="text-decoration:none;border:1px solid green;padding:.4rem .8rem;background-color:green;color:white;font-weight:bold;border-radius:.2rem;"><span class="material-symbols-outlined" style="position:relative;top:.4rem;right:.2rem;font-size:1.4rem;">arrow_back</span>back</a>
+  </div>
+
+
+
+</body>
+</html>

@@ -9,7 +9,7 @@
 <script src="{% static 'js/components.js'%}" defer></script>
 
 <link href="{% static 'css/import.css' %}" rel="stylesheet">
-<script src="{% static 'js/sweetalert.js' %}"></script>
+
 
 <div class="container">
     <div class="row">
@@ -92,7 +92,7 @@
               data.messages.forEach(function(message) {
             
                     if (message.tags.includes('success_import')) {
-                      swal({
+                      swal.fire({
                           title: "Import Successfully",
                           text: message.text,                                                                  
                           icon: 'success',          
@@ -101,7 +101,7 @@
   
                  
                   else {
-                      swal({
+                      swal.fire({
                           text: message.text,
                           icon: 'error',
                       });

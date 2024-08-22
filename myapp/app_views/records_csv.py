@@ -56,6 +56,22 @@ def add_ssp(request):
     except ObjectDoesNotExist:
         return JsonResponse({'success': False, 'message': 'No records found'})
 
+# def verify_ticket_page(request):
+#     csv_id = request.POST.get('csv_id')
+#     done_ticket = request.POST.get('done_ticket')
+
+#     try:
+#         datalist = pensioner_list.objects.get(csv_id=csv_id)
+#         data = {
+#             "success": True,
+#             "csv_id": datalist.csv_id,
+#             "endorsed_to":done_ticket,
+    
+#         }
+#         return JsonResponse(data)
+#     except ObjectDoesNotExist:
+#         return JsonResponse({'success': False, 'message': 'No records found'})
+
 
 @csrf_exempt
 def add_family(request):
@@ -73,68 +89,192 @@ def add_family(request):
         return JsonResponse({'success': False, 'message': 'No records found'})
 
 
+
+
+
+
 def records_csv_page(request):
     list_pen = pensioner_list.objects.all()
-
-    # Determine the next ticket number for SSP
-    last_ticket = ticket_list.objects.filter(ticket_num_family__isnull=False).order_by('ticket_num_family').last()
-    if last_ticket:
-        next_ticket_number = last_ticket.ticket_num_family + 1
-    else:
-        next_ticket_number = 10  # Start from 10 if no ticket exists
-
-
-    last_ticket_ssp = ticket_list.objects.filter(ticket_num_ssp__isnull=False).order_by('ticket_num_ssp').last()
-    if last_ticket_ssp:
-        next_ticket_number_ssp = last_ticket_ssp.ticket_num_ssp + 1
-    else:
-        next_ticket_number_ssp = 10  # Start from 10 if no ticket exists
-
+    ticket_record = ticket_list.objects.all()
     current_date = date.today()
     if request.method == 'POST':
         if 'save_family' in request.POST:
+            category = request.POST.get("category")
             endorsed_to = request.POST.get("endorsed_to")
             relationship = request.POST.get("relationship")
             name = request.POST.get("name")
             csv_id = request.POST.get("csv_id")
             valid_until = current_date + timedelta(days=30)
 
-            try:
-                x = ticket_list.objects.create(
-                    endorsed_to=endorsed_to,
-                    relationship=relationship,
-                    name=name,
-                    csv_id=csv_id,
-                    date_issued=current_date,
-                    valid_until=valid_until,
-                    ticket_num_family=next_ticket_number  # Incrementing SSP ticket number
-                )
-                return redirect('print_family_ticket_page', pk=x.csv_id)
-            except IntegrityError:
-                return HttpResponse("Error occurred. Please try again.")
+            if category == "consultation":
+                last_ticket = ticket_list.objects.filter(ticket_family_consult__isnull=False).order_by('ticket_family_consult').last()
+                if last_ticket:
+                    next_ticket_number = last_ticket.ticket_family_consult + 1
+                else:
+                    next_ticket_number = 10
+                try:
+                    x = ticket_list.objects.create(
+                        name=name,
+                        csv_id=csv_id,
+                        date_issued=current_date,
+                        valid_until=valid_until,
+                        ticket_family_consult=next_ticket_number,
+                        ticket_family_lab=None,
+                        checkup_type="consultation",
+                        endorsed_to=endorsed_to,
+                        relationship=relationship,
+                        recepient_type="family",
+                    )
+                    # return redirect('print_ssp_ticket_page', pk=x.csv_id)
+                except IntegrityError:
+                    return HttpResponse("Error occurred. Please try again.")
+
+            elif category == "laboratory":
+                last_ticket2 = ticket_list.objects.filter(ticket_family_lab__isnull=False).order_by('ticket_family_lab').last()
+                if last_ticket2:
+                    next_ticket_number = last_ticket2.ticket_family_lab + 1
+                else:
+                    next_ticket_number = 20
+                try:
+                    x = ticket_list.objects.create(
+                        name=name,
+                        csv_id=csv_id,
+                        date_issued=current_date,
+                        valid_until=valid_until,
+                        ticket_family_consult=None,
+                        ticket_family_lab=next_ticket_number,
+                        checkup_type="laboratory",
+                        endorsed_to=endorsed_to,
+                        relationship=relationship,
+                        recepient_type="family",
+                    )
+                    # return redirect('print_ssp_ticket_page', pk=x.csv_id)
+                except IntegrityError:
+                    return HttpResponse("Error occurred. Please try again.")
+            
+            elif category == "both":
+         
+                last_consultation_ticket = ticket_list.objects.filter(ticket_family_consult__isnull=False).order_by('ticket_family_consult').last()
+                if last_consultation_ticket:
+                    consultation_ticket_number = last_consultation_ticket.ticket_family_consult + 1
+                else:
+                    consultation_ticket_number = 10
+
+                last_laboratory_ticket = ticket_list.objects.filter(ticket_family_lab__isnull=False).order_by('ticket_family_lab').last()
+                if last_laboratory_ticket:
+                    laboratory_ticket_number = last_laboratory_ticket.ticket_family_lab + 1
+                else:
+                    laboratory_ticket_number = 20
+
+                try:
+                    x = ticket_list.objects.create(
+                        name=name,
+                        csv_id=csv_id,
+                        date_issued=current_date,
+                        valid_until=valid_until,
+                        ticket_family_consult=consultation_ticket_number,
+                        ticket_family_lab=laboratory_ticket_number,
+                        checkup_type="both",
+                        endorsed_to=endorsed_to,
+                        relationship=relationship,
+                        recepient_type="family",
+                    )
+                    # return redirect('print_ssp_ticket_page', pk=x.csv_id)
+                except IntegrityError:
+                    return HttpResponse("Error occurred. Please try again.")
+
+
         
         elif 'save_ssp' in request.POST:
-    
+            category = request.POST.get("category")
             name = request.POST.get("name")
             csv_id = request.POST.get("csv_id")
             valid_until = current_date + timedelta(days=30)
 
-            try:
-                x = ticket_list.objects.create(
-                    name=name,
-                    csv_id=csv_id,
-                    date_issued=current_date,
-                    valid_until=valid_until,
-                    ticket_num_ssp=next_ticket_number_ssp  # Incrementing SSP ticket number
-                )
-                return redirect('print_ssp_ticket_page', pk=x.csv_id)
-            except IntegrityError:
-                return HttpResponse("Error occurred. Please try again.")
+            # Separate logic for consultation and laboratory tickets
+            if category == "consultation":
+                last_ticket = ticket_list.objects.filter(ticket_ssp_consult__isnull=False).order_by('ticket_ssp_consult').last()
+                if last_ticket:
+                    next_ticket_number = last_ticket.ticket_ssp_consult + 1
+                else:
+                    next_ticket_number = 10
+                try:
+                    x = ticket_list.objects.create(
+                        name=name,
+                        csv_id=csv_id,
+                        date_issued=current_date,
+                        valid_until=valid_until,
+                        ticket_ssp_consult=next_ticket_number,
+                        ticket_ssp_lab=None,
+                        checkup_type="consultation",
+                        recepient_type="personal",
+                    )
+                    # return redirect('print_ssp_ticket_page', pk=x.csv_id)
+                except IntegrityError:
+                    return HttpResponse("Error occurred. Please try again.")
+
+            elif category == "laboratory":
+                last_ticket2 = ticket_list.objects.filter(ticket_ssp_lab__isnull=False).order_by('ticket_ssp_lab').last()
+                if last_ticket2:
+                    next_ticket_number = last_ticket2.ticket_ssp_lab + 1
+                else:
+                    next_ticket_number = 20
+                try:
+                    x = ticket_list.objects.create(
+                        name=name,
+                        csv_id=csv_id,
+                        date_issued=current_date,
+                        valid_until=valid_until,
+                        # Set ticket_ssp_consult to None for laboratory
+                        ticket_ssp_consult=None,
+                        ticket_ssp_lab=next_ticket_number,
+                        checkup_type="laboratory",
+                        recepient_type="personal",
+                    )
+                    # return redirect('print_ssp_ticket_page', pk=x.csv_id)
+                except IntegrityError:
+                    return HttpResponse("Error occurred. Please try again.")
+            
+            
+            elif category == "both":
+         
+                last_consultation_ticket = ticket_list.objects.filter(ticket_ssp_consult__isnull=False).order_by('ticket_ssp_consult').last()
+                if last_consultation_ticket:
+                    consultation_ticket_number = last_consultation_ticket.ticket_ssp_consult + 1
+                else:
+                    consultation_ticket_number = 10
+
+                last_laboratory_ticket = ticket_list.objects.filter(ticket_ssp_lab__isnull=False).order_by('ticket_ssp_lab').last()
+                if last_laboratory_ticket:
+                    laboratory_ticket_number = last_laboratory_ticket.ticket_ssp_lab + 1
+                else:
+                    laboratory_ticket_number = 20
+
+                try:
+                    x = ticket_list.objects.create(
+                        name=name,
+                        csv_id=csv_id,
+                        date_issued=current_date,
+                        valid_until=valid_until,
+                        ticket_ssp_consult=consultation_ticket_number,
+                        ticket_ssp_lab=laboratory_ticket_number,
+                        checkup_type="both",
+                        recepient_type="personal",
+                    )
+                    # return redirect('print_ssp_ticket_page', pk=x.csv_id)
+                except IntegrityError:
+                    return HttpResponse("Error occurred. Please try again.")
+
+            else:
+      
+                return HttpResponse("Invalid category selected.")
+                    
 
 
     context = {
         'list_pen': list_pen,
-        'next_ticket_number': next_ticket_number,
+        'ticket_record':ticket_record,
+        # 'next_ticket_number': next_ticket_number,
     }
 
     return render(request, 'myapp/records_csv.html', context)
@@ -174,7 +314,41 @@ def print_ssp_ticket_page(request, pk):
     }
     return render(request, 'myapp/print_ssp_ticket.html', context)
 
+def ticket_print(request, pk):
+    current_date = date.today()
+    current_month = current_date.month
+    
+    list_ticket = ticket_list.objects.filter(csv_id=pk,date_issued__month=current_month)
+  
+    if not list_ticket.exists():
+        return render(request, 'myapp/ticket_print_display.html', context={'error': 'Ticket not found.'})
 
+
+    context = {
+        'tickets': list_ticket,
+        'current_date': current_date.strftime('%b %d %Y'),  # Format date for display
+    }
+
+    return render(request, 'myapp/ticket_print_display.html', context)
+
+
+
+def ticket_print_fam(request, pk):
+    current_date = date.today()
+    current_month = current_date.month
+    
+    list_ticket = ticket_list.objects.filter(csv_id=pk,date_issued__month=current_month)
+ 
+    if not list_ticket.exists():
+        return render(request, 'myapp/ticket_print_fam.html', context={'error': 'Ticket not found.'})
+
+
+    context = {
+        'tickets': list_ticket,
+        'current_date': current_date.strftime('%b %d %Y'),  # Format date for display
+    }
+
+    return render(request, 'myapp/ticket_print_fam.html', context)
 
 
 

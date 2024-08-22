@@ -1,6 +1,6 @@
 
 $(document).ready(function() {
-    var csrftoken = $('meta[name="csrf-token"]').attr('content');
+var csrftoken = $('meta[name="csrf-token"]').attr('content');
 
 
 $("#defaultdatatables").on("click", "tbody .btn_ssp_view", function () {
@@ -82,6 +82,60 @@ $("#defaultdatatables").on("click", "tbody .btn_personal_checkup", function () {
 });
 
 
+// ticket done list
+$("#defaultdatatables").on("click", "tbody .btn_ticket_list_done", function () {
+    var csv_id = $(this).attr('data-ssp-id');
+    var name = $(this).attr('data-ssp-name');
+
+    $("#ticket_list_modal").modal('show');
+    $("#display_name").text(data.name)
+    document.getElementById("csv_id_tick").value = csv_id;
+    document.getElementById("display_name").value = name;
+
+});
+
+
+
+$("#save_ticket_done").on("click", function () {
+ var x = document.getElementById("csv_id_tick").value;
+
+    $.ajax({
+        type: 'POST',
+        url: '/save_checkup_status/',  // URL for Django view handling
+        data: {x: x},
+        headers: {
+            'X-CSRFToken': csrftoken
+        },
+        success: function (data) {
+     
+            if (data.success) {
+            
+
+                swal.fire({
+                    title: "Status successfully changed",
+                    text: "SUCCESSFULLY",                                                                  
+                    icon: 'success',          
+                }).then (function(){
+                    window.location.reload(); 
+                })           
+           
+            } else {
+                swal.fire({
+                    title: "Error Occured",
+                    text: "ERROR",                                                                  
+                    icon: 'error',          
+                });
+            }
+    
+        },
+        error: function (xhr, errmsg, err) {
+            alert("An error occurred.");
+        }
+    });
+
+
+});
+
 
 
 
@@ -124,4 +178,9 @@ $("#defaultdatatables").on("click", "tbody .btn_family_checkup", function () {
 
 
 });
+
+
+
+
+
 
