@@ -6,7 +6,8 @@
 {% include 'myapp/navbar.html' %}
 
 <link href="{% static 'css/components.css' %}" rel="stylesheet">
-<script src="{% static 'js/components.js'%}" defer></script>
+
+<script src="{% static 'js/modals.js' %}"></script>
 
 
 
@@ -47,66 +48,42 @@
     <div class="table-container card">
         <div class="card-body">
             <div class="table-responsive">
-                <input id="myInput" type="text" placeholder="Search.." style="margin-bottom:1.2rem;">
+              <input id="myInput" type="text" placeholder="Search.." style="margin-bottom:1.2rem;float:right;">
                 <table id="defaultdatatables" class="table table-bordered table-hover table-striped tables">
-                    <thead class="table-success">
-                        <tr>
-                            <th>NAME</th>
-                            <th>BANK</th>
-                            <th>PTYPE</th>
-                            <th>GROUPING</th>
-                            <th>ACTION</th>
-                        </tr>
-                    </thead>
-                    <tbody id="myTable">
-                        {% for x in list_pen %}
-                        <tr>
-                            <td>{{ x.name}}</td>
-                            <td>{{ x.bank }}</td>
-                            <td>{{ x.ptype }}</td>
-                            <td>{{ x.grouping }}</td>
-
-
-                            <td class="align-middle">
-
-                                <a class="material-symbols-outlined btn btn-success btn_ssp_view" data-ssp-id="{{ x.id }}"> wysiwyg </a>
-                                <!-- <a style="color:white;" class="material-symbols-outlined btn btn-primary" data-bs-toggle="modal" data-bs-target="#print_page{{x.id}}"> print </a> -->
-                             
-                                <div class="dropdown d-inline-block dropend">
-                                  <a class="btn btn-primary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Print
-                                  </a>
-
-                              
-                          
-                                  <ul class="dropdown-menu border-1 mt-0 shadow-sm">
-                                    <li><a class="dropdown-item btn_personal_checkup" data-ssp-id="{{ x.csv_id }}">For Personal Checkup</a></li>
-                                    <li><a class="dropdown-item btn_family_checkup" data-ssp-id="{{ x.csv_id }}">For Family Checkup</a></li>
-                                 
-                                        <li><a class="dropdown-item" href="{% url 'ticket_print' x.csv_id %}" target="_blank">View ticket</a></li>
-                                
-                                        {% comment %} <li><a class="dropdown-item" href="{% url 'ticket_print_fam' x.csv_id %}" target="_blank">View fam Ticket</a></li> {% endcomment %}
-                                
-                                
-                              
-                                  </div>
-                            </td>
-                        </tr>
-                
-       
-
-                        {% endfor %}
-
-
-
-
+                  <thead class="table-success">
+                  <tr>
+                      <th>NAME</th>
+                      <th>BANK</th>
+                      <th>PTYPE</th>
+                      <th>GROUPING</th>
+                      <th>ACTION</th>
+                  </tr>
+              </thead>
+              <tbody id="myTable">
+                  <!-- Data will be loaded here by AJAX -->
+              </tbody>
+                     
                       </tbody>
                       </table>
 
+                    </div>
+                  </div>
+                  
+                  
+                  <div id="pagination-container">
+                    <div id="pagination">
+                        <div id="page-numbers"></div>
+                    </div>
+                  </div>
+                  
+                  
+                  </div>
+                  </div>
+                  
+
+        
 
 
-
-<!-- modal VIEW -->
 <!-- modal VIEW -->
 <div class="modal fade" id="view_ssp_modal" tabindex="-1" aria-labelledby="view_ssp_modal" aria-hidden="true">
   <div class="modal-dialog modal-lg">
@@ -311,22 +288,224 @@
 
 
 
-            </div>
-        </div>
-
-        <div id="pagination-container">
-            <div id="pagination">
-                <div id="page-numbers"></div>
-            </div>
-        </div>
-
-
-    </div>
-</div>
 
 
 
-<script src="{% static 'js/modals.js' %}"></script>
 
+
+
+<script>
+  $(document).ready(function() {
+      fetchTickets();  // Fetch data via AJAX when the document is ready
+  });
+  
+  function fetchTickets() {
+      $.ajax({
+          url: "{% url 'pensioner_lists' %}",  // Ensure this URL is correct
+          type: "GET",
+          dataType: "json",
+          beforeSend: function() {
+              $('#myTable').html('<tr class="loading"><td>Loading tickets...</td></tr>');
+          },
+          success: function(data) {
+              console.log("Data received:", data); // Debugging line
+              $('#myTable').empty();
+
+              if (Array.isArray(data)) {
+                  $.each(data, function(index, ticket) {
+                      var row = $('<tr>');
+                      row.append('<td>' + ticket.name + '</td>');
+                      row.append('<td>' + ticket.bank + '</td>');
+                      row.append('<td>' + ticket.ptype + '</td>');
+                      row.append('<td>' + ticket.grouping + '</td>');
+                      row.append('<td class="align-middle">' +
+                          '<a style="margin-right:.4rem;" class="material-symbols-outlined btn btn-success btn_ssp_view" data-ssp-id="' + ticket.id + '">wysiwyg</a>' +
+                          '<div class="dropdown d-inline-block dropend">' +
+                              '<a class="btn btn-primary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Print</a>' +
+                              '<ul class="dropdown-menu border-1 mt-0 shadow-sm">' +
+                                  '<li><a class="dropdown-item btn_personal_checkup" data-ssp-id="' + ticket.csv_id + '">For Personal Checkup</a></li>' +
+                                  '<li><a class="dropdown-item btn_family_checkup" data-ssp-id="' + ticket.csv_id + '">For Family Checkup</a></li>' +
+                                  '<li><a class="dropdown-item" href="/ticket_print/' + ticket.csv_id + '/" target="_blank">View ticket</a></li>' +
+                              '</ul>' +
+                          '</div>' +
+                      '</td>');
+
+                      $('#myTable').append(row);
+                  });
+
+                  // Initialize pagination after data is loaded
+                  initializePagination();
+              } else {
+                  console.error("Data is not an array:", data);
+              }
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+              console.error("Error fetching tickets:", textStatus, errorThrown);
+              $('#myTable').html('<tr><td>Error fetching tickets.</td></tr>');
+          }
+      });
+  }
+
+  function initializePagination() {
+      var rowsPerPage = 5; // Number of rows per page
+      var currentPage = 1;
+      var pageNumbersToShow = 5; // Number of page numbers to display at a time
+
+      function calculateTotalPages() {
+          var totalRows = $("#myTable tr").length;
+          return Math.ceil(totalRows / rowsPerPage);
+      }
+
+      function showPage(page) {
+          var totalPages = calculateTotalPages(); // Calculate total pages dynamically
+          $("#myTable tr").hide();
+          $("#myTable tr").slice((page - 1) * rowsPerPage, page * rowsPerPage).show();
+          updatePageNumbers(totalPages);
+          updatePaginationControls(totalPages);
+      }
+
+      function updatePaginationControls(totalPages) {
+          $("#prev").prop("disabled", currentPage === 1);
+          $("#next").prop("disabled", currentPage === totalPages);
+      }
+
+      function updatePageNumbers(totalPages) {
+          var pageNumbersHtml = '';
+
+          // Add first and previous controls
+          pageNumbersHtml += '<button id="first">«</button> ';
+          pageNumbersHtml += '<button id="prev">‹</button> ';
+
+          // Calculate start and end page numbers
+          var startPage = Math.max(1, currentPage - Math.floor(pageNumbersToShow / 2));
+          var endPage = Math.min(totalPages, startPage + pageNumbersToShow - 1);
+
+          if (endPage - startPage + 1 < pageNumbersToShow) {
+              startPage = Math.max(1, endPage - pageNumbersToShow + 1);
+          }
+
+          if (startPage > 1) {
+              pageNumbersHtml += '<button class="page-number" data-page="1">1</button> ';
+              if (startPage > 2) {
+                  pageNumbersHtml += '... ';
+              }
+          }
+
+          for (var i = startPage; i <= endPage; i++) {
+              pageNumbersHtml += '<button class="page-number" data-page="' + i + '">' + i + '</button> ';
+          }
+
+          if (endPage < totalPages) {
+              if (endPage < totalPages - 1) {
+                  pageNumbersHtml += '... ';
+              }
+              pageNumbersHtml += '<button class="page-number" data-page="' + totalPages + '">' + totalPages + '</button> ';
+          }
+
+          // Add next and last controls
+          pageNumbersHtml += '<button id="next">›</button> ';
+          pageNumbersHtml += '<button id="last">»</button>';
+
+          $("#page-numbers").html(pageNumbersHtml);
+          $(".page-number").removeClass('active');
+          $(".page-number[data-page='" + currentPage + "']").addClass('active');
+      }
+
+      $("#page-numbers").on("click", ".page-number", function () {
+          var page = $(this).data("page");
+          currentPage = page;
+          showPage(currentPage);
+      });
+
+      $("#page-numbers").on("click", "#first", function () {
+          currentPage = 1;
+          showPage(currentPage);
+      });
+
+      $("#page-numbers").on("click", "#last", function () {
+          currentPage = calculateTotalPages(); // Calculate total pages dynamically
+          showPage(currentPage);
+      });
+
+      $("#page-numbers").on("click", "#prev", function () {
+          if (currentPage > 1) {
+              currentPage--;
+              showPage(currentPage);
+          }
+      });
+
+      $("#page-numbers").on("click", "#next", function () {
+          if (currentPage < calculateTotalPages()) { // Calculate total pages dynamically
+              currentPage++;
+              showPage(currentPage);
+          }
+      });
+
+      $("#myInput").on("keyup", function () {
+        var value = $(this).val().toLowerCase().trim();
+        if (value === "") {
+            // Reload initial data
+            currentPage = 1;
+            showPage(currentPage); // Display first 5 rows
+        } else {
+            $("#myTable tr").filter(function () {
+                var rowText = $(this).text().toLowerCase().replace(/[\W_]/g, ''); // Remove special characters
+                var searchText = value.replace(/[\W_]/g, ''); // Remove special characters from search term
+                $(this).toggle(rowText.indexOf(searchText) > -1);
+            });
+        }
+    });
+
+      // Initial page setup
+      showPage(currentPage);
+  }
+</script>
+
+
+
+
+
+
+<script>
+
+ 
+  function fetch_import_successful() {
+    $.ajax({
+        url: '{% url "fetch_add_successfully" %}',
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            data.messages.forEach(function(message) {
+          
+                  if (message.tags.includes('added')) {
+                    swal.fire({
+                        title: "Record Successfully Added",
+                        text: message.text,                                                                  
+                        icon: 'success',          
+                    });                                     
+                }
+
+               
+                else {
+                    swal.fire({
+                        text: message.text,
+                        icon: 'error',
+                    });
+                }
+            });
+        },
+
+        error: function(error) {
+            console.error('Error fetching messages:', error);
+        },
+        complete: function() {
+            setTimeout(fetch_import_successful, 1200);
+        }
+    });
+}
+
+fetch_import_successful();
+
+</script>
 
 {%endblock content %}

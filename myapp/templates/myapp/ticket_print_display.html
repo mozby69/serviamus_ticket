@@ -51,7 +51,9 @@
 
 <div class="maincontainer">
 
-
+    <div class="no-print" style="margin:.1rem 1rem;">
+        <button onclick="window.print()" style="padding:.6rem 1.6rem;margin-top:.8rem;background-color:green;color:white;border:none;border-radius:.2rem;font-weight:bold;">Print</button>
+    </div>
 
     {% for ticket in tickets %}
 
@@ -60,10 +62,9 @@
 
     {% if ticket.checkup_type == 'consultation' and ticket.recepient_type == 'personal' %}
 
-        
 
             <div class="ticket1" style="border:1px solid black;width:12.5rem;position:relative;margin:1rem;">
-                <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # {{ ticket.ticket_ssp_consult }}</p>
+                <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL:{{ ticket.ticket_ssp_consult }}</p>
                 
                 <img src="{% static 'images/ss2.png' %}" style="width:12.4rem;height:14.4rem;">
 
@@ -93,8 +94,8 @@
     {% elif ticket.checkup_type == 'consultation' and ticket.recepient_type == 'family' %}
 
     <div class="ticket1" style="border:1px solid black;width:14.5rem;position:relative;margin:1rem;">
-        <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # {{ ticket.ticket_family_consult }}</p>
-        <img src="{% static 'images/zz2.png' %}" style="width:14.4rem;height:14.4rem;">
+        <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL:{{ ticket.ticket_family_consult }}</p>
+        <img src="{% static 'images/zz1.png' %}" style="width:14.4rem;height:14.4rem;">
         
         <div class="container-items">
             <div class="row" style="margin-bottom:.2rem;border-bottom: 1px solid black;">
@@ -132,7 +133,7 @@
 
 
       <div class="ticket1" style="border:1px solid black;width:12.5rem;position:relative;margin:1rem;">
-          <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # {{ ticket.ticket_ssp_lab }}</p>
+          <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL:{{ ticket.ticket_ssp_lab }}</p>
           <img src="{% static 'images/ss1.png' %}" style="width:12.4rem;height:14.4rem;">
   
           <div class="container-items">
@@ -155,8 +156,8 @@
     {% elif ticket.checkup_type == 'laboratory' and ticket.recepient_type == 'family' %}
 
     <div class="ticket1" style="border:1px solid black;width:14.5rem;position:relative;margin:1rem;">
-        <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # {{ ticket.ticket_family_lab }}</p>
-        <img src="{% static 'images/zz1.png' %}" style="width:14.4rem;height:14.4rem;">
+        <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL:{{ ticket.ticket_family_lab }}</p>
+        <img src="{% static 'images/zz2.png' %}" style="width:14.4rem;height:14.4rem;">
         
         <div class="container-items">
             <div class="row" style="margin-bottom:.2rem;border-bottom: 1px solid black;">
@@ -198,7 +199,7 @@
     <div style="display:flex;"> 
 
     <div class="ticket1" style="border:1px solid black;width:12.5rem;position:relative;margin:1rem;">
-        <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # {{ ticket.ticket_ssp_consult }}</p>
+        <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL:{{ ticket.ticket_ssp_consult }}</p>
         <img src="{% static 'images/ss2.png' %}" style="width:12.4rem;height:14.4rem;">
 
         <div class="container-items">
@@ -216,7 +217,7 @@
 
 
    <div class="ticket1" style="border:1px solid black;width:12.5rem;position:relative;margin:1rem;">
-          <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # {{ ticket.ticket_ssp_lab }}</p>
+          <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL:{{ ticket.ticket_ssp_lab }}</p>
           <img src="{% static 'images/ss1.png' %}" style="width:12.4rem;height:14.4rem;">
   
           <div class="container-items">
@@ -241,7 +242,7 @@
 
    
         <div class="ticket1" style="border:1px solid black;width:14.5rem;position:relative;margin:1rem;">
-            <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # {{ ticket.ticket_family_consult }}</p>
+            <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL:{{ ticket.ticket_family_consult }}</p>
             <img src="{% static 'images/zz2.png' %}" style="width:14.4rem;height:14.4rem;">
             
             <div class="container-items">
@@ -275,7 +276,7 @@
 
 
         <div class="ticket1" style="border:1px solid black;width:14.5rem;position:relative;margin:1rem;">
-            <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL # {{ ticket.ticket_family_lab }}</p>
+            <p style="position:absolute;color:white;padding:.4rem;font-weight:bold;">CTRL:{{ ticket.ticket_family_lab }}</p>
             <img src="{% static 'images/zz1.png' %}" style="width:14.4rem;height:14.4rem;">
             
             <div class="container-items">
@@ -326,10 +327,10 @@
 
 
 
-<div style="position:relative;top:1rem;margin:1rem;" class="no-print">
+{% comment %} <div style="position:relative;top:1rem;margin:1rem;" class="no-print">
 
   <a href={% url 'records_csv_page' %} style="text-decoration:none;border:1px solid green;padding:.4rem .8rem;background-color:green;color:white;font-weight:bold;border-radius:.2rem;"><span class="material-symbols-outlined" style="position:relative;top:.4rem;right:.2rem;font-size:1.4rem;">arrow_back</span>back</a>
-  </div>
+  </div> {% endcomment %}
 
 
 

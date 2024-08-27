@@ -14,3 +14,11 @@
 .navbar{
     background-color: #5EA061;
 }
+@media print {
+    .no-print {
+        display: none;
+    }
+    @page {
+        margin: .1in; 
+    }
+}

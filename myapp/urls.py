@@ -1,6 +1,6 @@
 from . import views
 from django.urls import path
-from .app_views import index ,import_page,records_csv,ticket_done
+from .app_views import index ,import_page,records_csv,ticket_done,summary_report
 
 
 urlpatterns = [
@@ -22,4 +22,8 @@ urlpatterns = [
     path('ticket_print/<int:pk>/',records_csv.ticket_print, name="ticket_print"),
     path('ticket_print_fam/<int:pk>/',records_csv.ticket_print_fam,name="ticket_print_fam"),
     path('save_checkup_status/',ticket_done.save_checkup_status, name="save_checkup_status"),
+    path('fetch_add_successfully/',records_csv.fetch_add_successfully,name="fetch_add_successfully"),
+    path('pensioner_lists/',records_csv.pensioner_lists,name="pensioner_lists"),
+    path('summary_page/',summary_report.summary_page, name="summary_page"),
+    path('pensioner_lists_summary/',summary_report.pensioner_lists_summary,name="pensioner_lists_summary"),
     ]

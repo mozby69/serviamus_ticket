@@ -13,6 +13,12 @@ from django.urls import reverse
 from django.http import JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.messages import get_messages
+from django.contrib import messages
+from django.core import serializers
+
+
+
 
 
 
@@ -97,6 +103,7 @@ def records_csv_page(request):
     list_pen = pensioner_list.objects.all()
     ticket_record = ticket_list.objects.all()
     current_date = date.today()
+    countername = request.user.username
     if request.method == 'POST':
         if 'save_family' in request.POST:
             category = request.POST.get("category")
@@ -111,7 +118,7 @@ def records_csv_page(request):
                 if last_ticket:
                     next_ticket_number = last_ticket.ticket_family_consult + 1
                 else:
-                    next_ticket_number = 10
+                    next_ticket_number = 223
                 try:
                     x = ticket_list.objects.create(
                         name=name,
@@ -124,7 +131,9 @@ def records_csv_page(request):
                         endorsed_to=endorsed_to,
                         relationship=relationship,
                         recepient_type="family",
+                        counter_name=countername,
                     )
+                    messages.success(request, f'Ticket Successfully Added!', extra_tags='added')
                     # return redirect('print_ssp_ticket_page', pk=x.csv_id)
                 except IntegrityError:
                     return HttpResponse("Error occurred. Please try again.")
@@ -134,7 +143,7 @@ def records_csv_page(request):
                 if last_ticket2:
                     next_ticket_number = last_ticket2.ticket_family_lab + 1
                 else:
-                    next_ticket_number = 20
+                    next_ticket_number = 222
                 try:
                     x = ticket_list.objects.create(
                         name=name,
@@ -147,7 +156,9 @@ def records_csv_page(request):
                         endorsed_to=endorsed_to,
                         relationship=relationship,
                         recepient_type="family",
+                        counter_name=countername,
                     )
+                    messages.success(request, f'Ticket Successfully Added!', extra_tags='added')
                     # return redirect('print_ssp_ticket_page', pk=x.csv_id)
                 except IntegrityError:
                     return HttpResponse("Error occurred. Please try again.")
@@ -158,13 +169,13 @@ def records_csv_page(request):
                 if last_consultation_ticket:
                     consultation_ticket_number = last_consultation_ticket.ticket_family_consult + 1
                 else:
-                    consultation_ticket_number = 10
+                    consultation_ticket_number = 223
 
                 last_laboratory_ticket = ticket_list.objects.filter(ticket_family_lab__isnull=False).order_by('ticket_family_lab').last()
                 if last_laboratory_ticket:
                     laboratory_ticket_number = last_laboratory_ticket.ticket_family_lab + 1
                 else:
-                    laboratory_ticket_number = 20
+                    laboratory_ticket_number = 222
 
                 try:
                     x = ticket_list.objects.create(
@@ -178,7 +189,9 @@ def records_csv_page(request):
                         endorsed_to=endorsed_to,
                         relationship=relationship,
                         recepient_type="family",
+                        counter_name=countername,
                     )
+                    messages.success(request, f'Ticket Successfully Added!', extra_tags='added')
                     # return redirect('print_ssp_ticket_page', pk=x.csv_id)
                 except IntegrityError:
                     return HttpResponse("Error occurred. Please try again.")
@@ -197,7 +210,7 @@ def records_csv_page(request):
                 if last_ticket:
                     next_ticket_number = last_ticket.ticket_ssp_consult + 1
                 else:
-                    next_ticket_number = 10
+                    next_ticket_number = 2910
                 try:
                     x = ticket_list.objects.create(
                         name=name,
@@ -208,7 +221,9 @@ def records_csv_page(request):
                         ticket_ssp_lab=None,
                         checkup_type="consultation",
                         recepient_type="personal",
+                        counter_name=countername,
                     )
+                    messages.success(request, f'Ticket Successfully Added!', extra_tags='added')
                     # return redirect('print_ssp_ticket_page', pk=x.csv_id)
                 except IntegrityError:
                     return HttpResponse("Error occurred. Please try again.")
@@ -218,7 +233,7 @@ def records_csv_page(request):
                 if last_ticket2:
                     next_ticket_number = last_ticket2.ticket_ssp_lab + 1
                 else:
-                    next_ticket_number = 20
+                    next_ticket_number = 2685
                 try:
                     x = ticket_list.objects.create(
                         name=name,
@@ -230,7 +245,9 @@ def records_csv_page(request):
                         ticket_ssp_lab=next_ticket_number,
                         checkup_type="laboratory",
                         recepient_type="personal",
+                        counter_name=countername,
                     )
+                    messages.success(request, f'Ticket Successfully Added!', extra_tags='added')
                     # return redirect('print_ssp_ticket_page', pk=x.csv_id)
                 except IntegrityError:
                     return HttpResponse("Error occurred. Please try again.")
@@ -242,13 +259,13 @@ def records_csv_page(request):
                 if last_consultation_ticket:
                     consultation_ticket_number = last_consultation_ticket.ticket_ssp_consult + 1
                 else:
-                    consultation_ticket_number = 10
+                    consultation_ticket_number = 2910
 
                 last_laboratory_ticket = ticket_list.objects.filter(ticket_ssp_lab__isnull=False).order_by('ticket_ssp_lab').last()
                 if last_laboratory_ticket:
                     laboratory_ticket_number = last_laboratory_ticket.ticket_ssp_lab + 1
                 else:
-                    laboratory_ticket_number = 20
+                    laboratory_ticket_number = 2685
 
                 try:
                     x = ticket_list.objects.create(
@@ -260,7 +277,9 @@ def records_csv_page(request):
                         ticket_ssp_lab=laboratory_ticket_number,
                         checkup_type="both",
                         recepient_type="personal",
+                        counter_name=countername,
                     )
+                    messages.success(request, f'Ticket Successfully Added!', extra_tags='added')
                     # return redirect('print_ssp_ticket_page', pk=x.csv_id)
                 except IntegrityError:
                     return HttpResponse("Error occurred. Please try again.")
@@ -349,6 +368,42 @@ def ticket_print_fam(request, pk):
     }
 
     return render(request, 'myapp/ticket_print_fam.html', context)
+
+
+
+
+def fetch_add_successfully(request):
+    messages = get_messages(request)
+    filtered_messages = [
+        {'text': message.message, 'tags': message.tags} for message in messages if 'added' in message.tags
+        or 'breakout' in message.tags or 'breakin' in message.tags
+       
+    ]
+
+    return JsonResponse({'messages': filtered_messages})
+
+
+
+
+
+
+
+
+
+
+
+
+
+def pensioner_lists(request):
+    if request.method == 'GET':
+        # Fetch ticket data from the database
+        tickets = pensioner_list.objects.all().values('id', 'name', 'bank', 'ptype', 'grouping', 'csv_id')
+
+        return JsonResponse(list(tickets), safe=False)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
 
 
 

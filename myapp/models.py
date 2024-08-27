@@ -30,9 +30,10 @@ class ticket_list(models.Model):
     ticket_ssp_lab = models.PositiveIntegerField(unique=True, null=True, blank=True, default=None)
     ticket_family_consult = models.PositiveIntegerField(unique=True, null=True, blank=True, default=None)
     ticket_family_lab = models.PositiveIntegerField(unique=True, null=True, blank=True, default=None)
-    checkup_status = models.CharField(max_length=200,default="Pending_Checkup")
+    checkup_status = models.CharField(max_length=200,default="PENDING CHECKUP")
     checkup_type = models.CharField(max_length=100,null=True,blank=True)
     recepient_type = models.CharField(max_length=100,null=True,blank=True)
+    counter_name = models.CharField(max_length=100,null=True,blank=True)
 
 
     

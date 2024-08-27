@@ -6,7 +6,7 @@
 {% include 'myapp/navbar.html' %}
 
 <link href="{% static 'css/components.css' %}" rel="stylesheet">
-<script src="{% static 'js/components.js'%}" defer></script>
+<!-- <script src="{% static 'js/components.js'%}" defer></script> -->
 
 <style>
    
@@ -47,6 +47,15 @@
                 </table>
             </div>
         </div>
+
+             
+        <div id="pagination-container">
+            <div id="pagination">
+                <div id="page-numbers"></div>
+            </div>
+          </div>
+
+          
     </div>
 </div>
 
@@ -59,35 +68,23 @@
 
 
 
-
-<!-- modal -->
+<!-- Modal -->
 <div class="modal fade" id="ticket_list_modal" tabindex="-1" aria-labelledby="ticket_list_modal" aria-hidden="true">
     <div class="modal-dialog">
         <form id="familyForm" method="post">
             {% csrf_token %}
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Confirmation</h5>
+                    <h5 class="modal-title">Ticket Details</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-
-       
-                  <div id="display_name"></div>
-              
-
-                    <div>
-                        <label for="done_ticket" class="form-label"></label>
-                        <input type="hidden" class="form-control" id="done_ticket" name="done_ticket" value="Done_Checkup">
-                    </div>
-
-                    <!-- <input type="text" id="csv_id_tick" name="csv_id_tick" s"> -->
-
-                
-                    
+                    <div id="display_name" class="mb-3"></div>
+                    <div id="ticket_display"></div>
+                    <input type="hidden" id="csv_id_tick">
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" name="save_family" id="save_ticket_done">Done checkup</button>
+                    <button type="button" class="btn btn-primary" id="save_ticket_done">Done Checkup</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -97,54 +94,169 @@
 
 
 
-
 <script src="{% static 'js/modals.js' %}"></script>
 <script>
 
     $(document).ready(function() {
         fetchTickets();
     });
-
-function fetchTickets() {
-    $.ajax({
-        url: "{% url 'fetch_tickets' %}", 
-        type: "GET",
-        dataType: "json",
-        beforeSend: function() {
-        
-            $('#myTable').html('<tr class="loading"><td>Loading tickets...</td></tr>');
-        },
-        success: function(data) {
-           
-            $('#myTable').empty();
-
-            $.each(data, function(index, ticket) {
-                if(ticket.checkup_status == 'Done_Checkup'){
-                    var x = "badge text-bg-success";
-                }
-                else{
-                    var x = "badge text-bg-warning";
-                }
-                var row = $('<tr>');
-                row.append('<td>' + ticket.name + '</td>');
-                row.append('<td>' + ticket.date_issued + '</td>');
-                row.append('<td>' + ticket.valid_until + '</td>');
-                row.append('<td>' + ticket.endorsed_to + '</td>');
-                row.append('<td>' + ticket.relationship + '</td>');
-                row.append("<td style='width:8rem;margin-left:1rem;margin-top:.6rem;padding:.8rem 1rem;' class='" + x + "'>" + ticket.checkup_status + '</td>');
-                row.append('<td><a class="material-symbols-outlined btn btn-success btn_ticket_list_done" data-ssp-id="'+ticket.csv_id+'" data-ssp-name="'+ticket.name+'"> wysiwyg </a></td>'); // Add action column logic if needed
-
-                $('#myTable').append(row);
-            });
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-            console.error("Error fetching tickets:", textStatus, errorThrown);
-            $('#myTable').html('<tr><td>Error fetching tickets.</td></tr>');
-        }
-    });
-}
+    
+    function fetchTickets() {
+        $.ajax({
+            url: "{% url 'fetch_tickets' %}",  // Ensure this URL is correct
+            type: "GET",
+            dataType: "json",
+            beforeSend: function() {
+                $('#myTable').html('<tr class="loading"><td>Loading tickets...</td></tr>');
+            },
+            success: function(data) {
+                $('#myTable').empty();
+    
+                $.each(data, function(index, ticket) {
+                    var badgeClass = ticket.checkup_status == 'DONE CHECKUP' ? 'badge text-bg-success' : 'badge text-bg-warning';
+                    
+                    var row = $('<tr>');
+                    row.append('<td>' + ticket.name + '</td>');
+                    row.append('<td>' + ticket.date_issued + '</td>');
+                    row.append('<td>' + ticket.valid_until + '</td>');
+                    row.append('<td>' + ticket.endorsed_to + '</td>');
+                    row.append('<td>' + ticket.relationship + '</td>');
+                    row.append("<td style='width:9.2rem;margin-left:1rem;margin-top:.6rem;padding:.8rem 1rem;' class='" + badgeClass + "'>" + ticket.checkup_status + '</td>');
+                    row.append('<td><a class="material-symbols-outlined btn btn-success btn_ticket_list_done" ' +
+                        'data-ssp-id="' + ticket.csv_id + '" ' +
+                        'data-ssp-name="' + ticket.name + '" ' +
+                        'data-ticket-ssp-consult="' + (ticket.ticket_ssp_consult || '') + '" ' +
+                        'data-ticket-ssp-lab="' + (ticket.ticket_ssp_lab || '') + '" ' +
+                        'data-ticket-family-consult="' + (ticket.ticket_family_consult || '') + '" ' +
+                        'data-ticket-family-lab="' + (ticket.ticket_family_lab || '') + '">' +
+                        'wysiwyg</a></td>');
+    
+                    $('#myTable').append(row);
+                    initializePagination();
+                });
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error("Error fetching tickets:", textStatus, errorThrown);
+                $('#myTable').html('<tr><td>Error fetching tickets.</td></tr>');
+            }
+        });
+    }
 </script>
 
 
+<script>
+      function initializePagination() {
+      var rowsPerPage = 5; // Number of rows per page
+      var currentPage = 1;
+      var pageNumbersToShow = 5; // Number of page numbers to display at a time
 
+      function calculateTotalPages() {
+          var totalRows = $("#myTable tr").length;
+          return Math.ceil(totalRows / rowsPerPage);
+      }
+
+      function showPage(page) {
+          var totalPages = calculateTotalPages(); // Calculate total pages dynamically
+          $("#myTable tr").hide();
+          $("#myTable tr").slice((page - 1) * rowsPerPage, page * rowsPerPage).show();
+          updatePageNumbers(totalPages);
+          updatePaginationControls(totalPages);
+      }
+
+      function updatePaginationControls(totalPages) {
+          $("#prev").prop("disabled", currentPage === 1);
+          $("#next").prop("disabled", currentPage === totalPages);
+      }
+
+      function updatePageNumbers(totalPages) {
+          var pageNumbersHtml = '';
+
+          // Add first and previous controls
+          pageNumbersHtml += '<button id="first">«</button> ';
+          pageNumbersHtml += '<button id="prev">‹</button> ';
+
+          // Calculate start and end page numbers
+          var startPage = Math.max(1, currentPage - Math.floor(pageNumbersToShow / 2));
+          var endPage = Math.min(totalPages, startPage + pageNumbersToShow - 1);
+
+          if (endPage - startPage + 1 < pageNumbersToShow) {
+              startPage = Math.max(1, endPage - pageNumbersToShow + 1);
+          }
+
+          if (startPage > 1) {
+              pageNumbersHtml += '<button class="page-number" data-page="1">1</button> ';
+              if (startPage > 2) {
+                  pageNumbersHtml += '... ';
+              }
+          }
+
+          for (var i = startPage; i <= endPage; i++) {
+              pageNumbersHtml += '<button class="page-number" data-page="' + i + '">' + i + '</button> ';
+          }
+
+          if (endPage < totalPages) {
+              if (endPage < totalPages - 1) {
+                  pageNumbersHtml += '... ';
+              }
+              pageNumbersHtml += '<button class="page-number" data-page="' + totalPages + '">' + totalPages + '</button> ';
+          }
+
+          // Add next and last controls
+          pageNumbersHtml += '<button id="next">›</button> ';
+          pageNumbersHtml += '<button id="last">»</button>';
+
+          $("#page-numbers").html(pageNumbersHtml);
+          $(".page-number").removeClass('active');
+          $(".page-number[data-page='" + currentPage + "']").addClass('active');
+      }
+
+      $("#page-numbers").on("click", ".page-number", function () {
+          var page = $(this).data("page");
+          currentPage = page;
+          showPage(currentPage);
+      });
+
+      $("#page-numbers").on("click", "#first", function () {
+          currentPage = 1;
+          showPage(currentPage);
+      });
+
+      $("#page-numbers").on("click", "#last", function () {
+          currentPage = calculateTotalPages(); // Calculate total pages dynamically
+          showPage(currentPage);
+      });
+
+      $("#page-numbers").on("click", "#prev", function () {
+          if (currentPage > 1) {
+              currentPage--;
+              showPage(currentPage);
+          }
+      });
+
+      $("#page-numbers").on("click", "#next", function () {
+          if (currentPage < calculateTotalPages()) { // Calculate total pages dynamically
+              currentPage++;
+              showPage(currentPage);
+          }
+      });
+
+      $("#myInput").on("keyup", function () {
+        var value = $(this).val().toLowerCase().trim();
+        if (value === "") {
+            // Reload initial data
+            currentPage = 1;
+            showPage(currentPage); // Display first 5 rows
+        } else {
+            $("#myTable tr").filter(function () {
+                var rowText = $(this).text().toLowerCase().replace(/[\W_]/g, ''); // Remove special characters
+                var searchText = value.replace(/[\W_]/g, ''); // Remove special characters from search term
+                $(this).toggle(rowText.indexOf(searchText) > -1);
+            });
+        }
+    });
+
+      // Initial page setup
+      showPage(currentPage);
+  }
+</script>
 {% endblock %}

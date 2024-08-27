@@ -11,6 +11,7 @@ from myapp.models import import_history
 from django.contrib import messages
 from django.contrib.messages import get_messages
 from django.http import JsonResponse
+from django.db import connection
 
 
 
@@ -29,6 +30,10 @@ def import_page(request):
             file_content = ContentFile(content)
             file_name = fs.save("_tmp.csv", file_content)
             tmp_file = fs.path(file_name)
+
+            # Truncate the table before importing new data
+            with connection.cursor() as cursor:
+                cursor.execute('TRUNCATE TABLE pensioner_list;')
 
             # Open and decode the CSV file into a text stream
             with open(tmp_file, 'r', encoding='utf-8', errors="ignore") as file:
@@ -68,20 +73,17 @@ def import_page(request):
                     file_name=csv_file.name
                 )
 
-            messages.success(request, f'Import Sucessfully!', extra_tags='success_import')
-
-            
+            messages.success(request, f'Import Successfully!', extra_tags='success_import')
 
     else:
         form = CSVUploadForm()
 
     context = {
-        'form':form,
+        'form': form,
         'import_list': import_list,
     }    
-    
-    return render(request, 'myapp/import.html', context)
 
+    return render(request, 'myapp/import.html', context)
 
 def fetch_import_successful(request):
     messages = get_messages(request)

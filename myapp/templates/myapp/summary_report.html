@@ -1,0 +1,177 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>SUMMARY REPORT</title>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <script src="{% static 'js/ajax.js'%}"></script>
+  
+
+
+<style>
+    table th{
+        text-align: center;
+        vertical-align: middle;
+    }
+    @media print {
+    .no-print {
+        display: none;
+    }
+    @page {
+        margin: .1in; 
+    }
+}
+</style>
+
+</head>
+<body>
+
+<div class="m-2 mt-5">
+    
+    <div clas="display:flex;justify-content:space-between">
+        <div>
+            <h6 style="font-size:.7rem;font-weight:bold;">FREE CONSULTATION/FREE LABORATORY CONTROL FORM</h6>
+            <h6 style="font-size:.7rem;font-weight:bold;">BACOLOD MAIN BRANCH</h6>
+            <h6 style="font-size:.7rem;font-weight:bold;">FOR THE MONTH OF: AUGUST 21, 2024</h6>
+        </div>
+
+        <div style="float:right;" class="no-print">
+            <label>Date: </label>
+            <input type="date" id="dateFilter" style="padding:.1rem 1rem;">
+        </div>
+       
+    </div>
+  
+<table  style="font-size:.7rem;"class="table table-bordered table-hover table-striped tables">
+
+    <thead>
+        <tr style="border-top:none;">
+            <th style="border:none;"></th>
+            <th style="border:none;"></th>
+            <th style="border:none;"></th>
+            <th style="border:none;"></th>
+            <th style="border:none;"></th>
+            <th style="border:none;"></th>
+            <th style="border:none;"></th>
+            <th style="border:none;"></th>
+            <th colspan="2" style="text-align: center;border:1px solid rgb(240, 240, 240);">Released</th>
+            <th colspan="3" style="text-align:center;border:1px solid rgb(240, 240, 240);"># of Coupon availed</th>
+            <th style="border:none;"></th>
+            <th style="border:none;"></th>
+        </tr>
+        <tr>
+            <th style="width:.8rem;">NO</th>
+            <th style="width:10rem">PENSIONER'S NAME</th>
+            <th style="width:1rem;">ID</th>
+            <th style="width:6rem">TRANSFERRED TO</th>
+            <th style="width:2rem">RELATIONSHIP</th>
+            <th style="width:2rem">CONSULTATION TICKET</th>
+            <th style="width:2rem">LABORATORY TICKET</th>
+            <th style="width:7rem">PENSIONER'S SIGNATURE</th>
+            <th style="width:5rem">DATE</th>
+            <th style="width:7rem">BY:SIGNATURE</th>
+            <th style="width:3rem">1st</th>
+            <th style="width:3rem">2nd</th>
+            <th style="width:3rem">3rd</th>
+            <th>Remarks</th>
+            <th colspan="2">Contacts</th>
+        </tr>
+    </thead>
+    <tbody id="myTable">
+
+        <!-- Data will be loaded here by AJAX -->
+    </tbody>
+</table>
+
+<div style="margin-top:2.5rem;">
+    <h6 style="font-size: .7rem;">CONSULTATION : </h6>
+    <h6 style="font-size: .7rem;">LABORATORY : </h6>
+</div>
+
+<div style="display:flex;justify-content: space-evenly;">
+    <div style="width: 10rem;border-top: 1px solid black;"><h6 style="font-size:.7rem;">DISCOUNTER OFFICER</h6></div>
+    <div style="width: 10rem;border-top: 1px solid black;"><h6 style="font-size:.7rem;">F&A</h6></div>
+    <div style="width: 10rem;border-top: 1px solid black;"><h6 style="font-size:.7rem;">NOTED BY (BOH):</h6></div>
+</div>
+
+
+
+
+
+
+
+
+
+</div>
+
+
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+
+
+<script>
+  $(document).ready(function() {
+    fetchTickets();
+
+    $('#dateFilter').on('change', function() {
+        fetchTickets(); // Call fetchTickets again when the date changes
+    });
+});
+
+function fetchTickets() {
+    var selectedDate = $('#dateFilter').val(); // Get the selected date
+
+    $.ajax({
+        url: "{% url 'pensioner_lists_summary' %}", // Ensure this URL is correct
+        type: "GET",
+        data: { date: selectedDate }, // Pass the selected date as a query parameter
+        dataType: "json",
+        beforeSend: function() {
+            $('#myTable').html('<tr class="loading"><td>Loading tickets...</td></tr>');
+        },
+        success: function(data) {
+            console.log("Data received:", data); // Debugging line
+            $('#myTable').empty();
+
+            if (Array.isArray(data)) {
+                $.each(data, function(index, ticket) {
+                    var row = $('<tr>');
+                    row.append('<td>' + (index + 1) + '</td>');  // Row number
+                    row.append('<td>' + ticket.name + '</td>');
+                    row.append('<td>' + ticket.csv_id + '</td>');
+                    row.append('<td>' + ticket.endorsed_to + '</td>');
+                    row.append('<td>' + ticket.relationship + '</td>');
+                    row.append('<td>'+ticket.consultation_ticket+'</td>');
+                    row.append('<td>'+ticket.laboratory_ticket+'</td>');
+
+                    $('#myTable').append(row);
+                });
+            } else {
+                console.error("Data is not an array:", data);
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.error("Error fetching tickets:", textStatus, errorThrown);
+            $('#myTable').html('<tr><td colspan="15">EMPTY DATA</td></tr>');
+        }
+    });
+}
+
+
+</script>
+
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
