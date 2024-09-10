@@ -35,7 +35,7 @@
         <div>
             <h6 style="font-size:.7rem;font-weight:bold;">FREE CONSULTATION/FREE LABORATORY CONTROL FORM</h6>
             <h6 style="font-size:.7rem;font-weight:bold;">BACOLOD MAIN BRANCH</h6>
-            <h6 style="font-size:.7rem;font-weight:bold;">FOR THE MONTH OF: AUGUST 21, 2024</h6>
+            <h6 style="font-size:.7rem;font-weight:bold;"  id="dateDisplay"></h6>
         </div>
 
         <div style="float:right;" class="no-print">
@@ -109,7 +109,7 @@
 
 
 
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="{% static 'js/jquery.js'%}"></script>
 <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
 
 
@@ -118,6 +118,8 @@
     fetchTickets();
 
     $('#dateFilter').on('change', function() {
+        var selectedDate = $(this).val();
+        updateDateDisplay(selectedDate);
         fetchTickets(); // Call fetchTickets again when the date changes
     });
 });
@@ -140,13 +142,20 @@ function fetchTickets() {
             if (Array.isArray(data)) {
                 $.each(data, function(index, ticket) {
                     var row = $('<tr>');
+                    var endorsedTo = ticket.endorsed_to ? ticket.endorsed_to : ''; 
+                    var fin_relationship = ticket.relationship ? ticket.relationship : '';
                     row.append('<td>' + (index + 1) + '</td>');  // Row number
                     row.append('<td>' + ticket.name + '</td>');
                     row.append('<td>' + ticket.csv_id + '</td>');
-                    row.append('<td>' + ticket.endorsed_to + '</td>');
-                    row.append('<td>' + ticket.relationship + '</td>');
+                    row.append('<td>' + endorsedTo + '</td>');
+                    row.append('<td>' + fin_relationship + '</td>');
                     row.append('<td>'+ticket.consultation_ticket+'</td>');
                     row.append('<td>'+ticket.laboratory_ticket+'</td>');
+                    row.append('<td> <td>');
+                    row.append('<td> <td>');
+                    row.append('<td> <td>');
+                    row.append('<td> <td>');
+                    
 
                     $('#myTable').append(row);
                 });
@@ -161,7 +170,26 @@ function fetchTickets() {
     });
 }
 
+function updateDateDisplay(date) {
+        if (date) {
+            var formattedDate = formatDate(date);
+            $('#dateDisplay').text('FOR THE MONTH OF: ' + formattedDate);
+        } else {
+            $('#dateDisplay').text('FOR THE MONTH OF: N/A'); // Default text when no date is selected
+        }
+    }
 
+    function formatDate(date) {
+        var dateObj = new Date(date);
+        
+        // Extract day, month, and year
+        var day = dateObj.getDate();
+        var month = dateObj.toLocaleString('en-US', { month: 'long' }).toUpperCase(); // Convert month to uppercase
+        var year = dateObj.getFullYear();
+
+        // Construct the formatted date string
+        return `${month} ${day}, ${year}`;
+    }  
 </script>
 
   </body>

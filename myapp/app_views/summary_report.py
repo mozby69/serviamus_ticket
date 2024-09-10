@@ -39,3 +39,7 @@ def pensioner_lists_summary(request):
                 return JsonResponse({'error': 'Date not provided'}, status=400)
         else:
             return JsonResponse({'error': 'Invalid request method'}, status=400)
+        
+
+
+        

@@ -7,7 +7,7 @@
 
 <link href="{% static 'css/components.css' %}" rel="stylesheet">
 <!-- <script src="{% static 'js/components.js'%}" defer></script> -->
-
+<link href="{% static 'css/aos.css'%}" rel="stylesheet">
 <style>
    
 .records-container{
@@ -21,8 +21,14 @@
 
 
 
-<div class="records-container">
-    <h4 style="color:#5EA061;font-weight:600;font-size:1.8rem;margin-bottom:2rem;">TICKET LIST</h4>
+<div class="records-container" data-aos="fade-up" data-aos-duration="750">
+    <div style="display:flex;gap:1rem;">
+        <div style="position:relative;bottom:.3rem;"><img src="{% static 'images/nobg.png'%}" width="45" height="45"></div>
+        <div><h4 style="color:#5EA061;font-weight:900;font-size:1.8rem;margin-bottom:2rem;">TICKET LIST</h4></div>
+  
+    </div>
+
+ 
     <div class="table-container card">
         <div class="card-body">
             <div class="table-responsive">
@@ -35,6 +41,9 @@
                             <th>VALID UNTIL</th>
                             <th>ENDORSED TO</th>
                             <th>RELATIONSHIP</th>
+                            <th>CHECKUP TYPE</th>
+                            <th>RECEPIENT TYPE</th>
+                            <th>BRANCH</th>
                             <th>CHECKUP STATUS</th>
                             <th>ACTION</th>
                         </tr>
@@ -93,7 +102,11 @@
 </div>
 
 
+<script src="{% static 'js/aos.js' %}"></script>
+<script>
+    AOS.init();
 
+  </script>
 <script src="{% static 'js/modals.js' %}"></script>
 <script>
 
@@ -116,14 +129,19 @@
                     var badgeClass = ticket.checkup_status == 'DONE CHECKUP' ? 'badge text-bg-success' : 'badge text-bg-warning';
                     
                     var row = $('<tr>');
+                    var endorsedTo = ticket.endorsed_to ? ticket.endorsed_to : ''; 
+                    var fin_relationship = ticket.relationship ? ticket.relationship : '';
                     row.append('<td>' + ticket.name + '</td>');
-                    row.append('<td>' + ticket.date_issued + '</td>');
-                    row.append('<td>' + ticket.valid_until + '</td>');
-                    row.append('<td>' + ticket.endorsed_to + '</td>');
-                    row.append('<td>' + ticket.relationship + '</td>');
+                    row.append('<td>' + formatDate(ticket.date_issued) + '</td>');
+                    row.append('<td>' + formatDate(ticket.valid_until) + '</td>');
+                    row.append('<td>' + endorsedTo + '</td>');
+                    row.append('<td>' +fin_relationship+ '</td>');
+                    row.append('<td>' + ticket.checkup_type + '</td>');
+                    row.append('<td>' + ticket.recepient_type + '</td>');
+                    row.append('<td>' + ticket.branch_name + '</td>');
                     row.append("<td style='width:9.2rem;margin-left:1rem;margin-top:.6rem;padding:.8rem 1rem;' class='" + badgeClass + "'>" + ticket.checkup_status + '</td>');
                     row.append('<td><a class="material-symbols-outlined btn btn-success btn_ticket_list_done" ' +
-                        'data-ssp-id="' + ticket.csv_id + '" ' +
+                        'data-ssp-id="' + ticket.id + '" ' +
                         'data-ssp-name="' + ticket.name + '" ' +
                         'data-ticket-ssp-consult="' + (ticket.ticket_ssp_consult || '') + '" ' +
                         'data-ticket-ssp-lab="' + (ticket.ticket_ssp_lab || '') + '" ' +
@@ -141,6 +159,15 @@
             }
         });
     }
+
+
+
+
+    function formatDate(dateStr) {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', options);
+}
 </script>
 
 

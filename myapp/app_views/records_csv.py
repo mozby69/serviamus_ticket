@@ -16,10 +16,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.messages import get_messages
 from django.contrib import messages
 from django.core import serializers
-
-
-
-
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.contrib.auth import logout
+from django.db.models import Count
+from django.urls import reverse_lazy
 
 
 def view_ssp(request):
@@ -48,9 +48,11 @@ def add_ssp(request):
     csv_id = request.POST.get('csv_id')
     endorsed_to = request.POST.get('endorsed_to')
     relationship = request.POST.get('relationship')
+    branch_name = request.POST.get('branch_name')
+
 
     try:
-        datalist = pensioner_list.objects.get(csv_id=csv_id)
+        datalist = pensioner_list.objects.get(csv_id=csv_id,branch_name=branch_name)
         data = {
             "success": True,
             "name": datalist.name,
@@ -82,9 +84,12 @@ def add_ssp(request):
 @csrf_exempt
 def add_family(request):
     csv_id = request.POST.get('csv_id')
+    branch_name = request.POST.get('branch_name')
+
+
     print("result llll", csv_id)
     try:
-        datalist = pensioner_list.objects.get(csv_id=csv_id)
+        datalist = pensioner_list.objects.get(csv_id=csv_id,branch_name=branch_name)
         data = {
             "success": True,
             "name": datalist.name,
@@ -95,31 +100,77 @@ def add_family(request):
         return JsonResponse({'success': False, 'message': 'No records found'})
 
 
+def add_weekdays(start_date, num_days):
+    """Add weekdays to a start date, excluding weekends."""
+    current_date = start_date
+    while num_days > 0:
+        current_date += timedelta(days=1)
+        if current_date.weekday() < 5:  # 0-4 are weekdays (Monday to Friday)
+            num_days -= 1
+    return current_date
 
 
 
+STARTING_NUMBERS_CONSULT = {
+    'admin': 223,
+    'RLC_SINGCANG': 100,
+    'FCH-BACOLOD': 50,
+}
 
+def get_starting_number_consult(username):
+    return STARTING_NUMBERS_CONSULT.get(username, 223)
+
+
+STARTING_NUMBERS_LAB = {
+    'admin': 223,
+    'RLC_SINGCANG': 120,
+    'FCH-BACOLOD': 60,
+}
+
+def get_starting_number_lab(username):
+    return STARTING_NUMBERS_LAB.get(username, 1)
+
+
+@transaction.atomic
 def records_csv_page(request):
     list_pen = pensioner_list.objects.all()
     ticket_record = ticket_list.objects.all()
     current_date = date.today()
-    countername = request.user.username
+    branch_name = request.user.username
+    current_month = current_date.month
+    current_year = current_date.year
+
     if request.method == 'POST':
+
         if 'save_family' in request.POST:
             category = request.POST.get("category")
             endorsed_to = request.POST.get("endorsed_to")
             relationship = request.POST.get("relationship")
             name = request.POST.get("name")
             csv_id = request.POST.get("csv_id")
-            valid_until = current_date + timedelta(days=30)
+            valid_until = add_weekdays(current_date, 4) 
+
+
+            duplicates = ticket_list.objects.filter(
+                csv_id=csv_id,
+                branch_name=branch_name,
+                date_issued__year=current_year,
+                date_issued__month=current_month
+            )
+
+            starting_number_consult = get_starting_number_consult(branch_name)
+            starting_number_lab = get_starting_number_lab(branch_name)
 
             if category == "consultation":
-                last_ticket = ticket_list.objects.filter(ticket_family_consult__isnull=False).order_by('ticket_family_consult').last()
-                if last_ticket:
-                    next_ticket_number = last_ticket.ticket_family_consult + 1
+                last_ticket = ticket_list.objects.filter(ticket_family_consult__isnull=False, branch_name=branch_name).order_by('ticket_family_consult').last()
+                next_ticket_number = last_ticket.ticket_family_consult + 1 if last_ticket else starting_number_consult
+
+                if duplicates.exists():
+                    messages.error(request, f'This account already has a ticket for this date!',extra_tags='duplicate')
+                    return redirect('records_csv_page')
+                
                 else:
-                    next_ticket_number = 223
-                try:
+                    # Create the new ticket
                     x = ticket_list.objects.create(
                         name=name,
                         csv_id=csv_id,
@@ -131,70 +182,72 @@ def records_csv_page(request):
                         endorsed_to=endorsed_to,
                         relationship=relationship,
                         recepient_type="family",
-                        counter_name=countername,
+                        branch_name=branch_name,
                     )
                     messages.success(request, f'Ticket Successfully Added!', extra_tags='added')
-                    # return redirect('print_ssp_ticket_page', pk=x.csv_id)
-                except IntegrityError:
-                    return HttpResponse("Error occurred. Please try again.")
+                    return redirect('records_csv_page')
 
             elif category == "laboratory":
-                last_ticket2 = ticket_list.objects.filter(ticket_family_lab__isnull=False).order_by('ticket_family_lab').last()
-                if last_ticket2:
-                    next_ticket_number = last_ticket2.ticket_family_lab + 1
+                last_ticket2 = ticket_list.objects.filter(ticket_family_lab__isnull=False, branch_name=branch_name).order_by('ticket_family_lab').last()
+                next_ticket_number = last_ticket2.ticket_family_lab + 1 if last_ticket2 else starting_number_lab
+
+                if duplicates.exists():
+                    messages.error(request, f'This account already has a ticket for this date!',extra_tags='duplicate')
+                    return redirect('records_csv_page')
                 else:
-                    next_ticket_number = 222
-                try:
-                    x = ticket_list.objects.create(
-                        name=name,
-                        csv_id=csv_id,
-                        date_issued=current_date,
-                        valid_until=valid_until,
-                        ticket_family_consult=None,
-                        ticket_family_lab=next_ticket_number,
-                        checkup_type="laboratory",
-                        endorsed_to=endorsed_to,
-                        relationship=relationship,
-                        recepient_type="family",
-                        counter_name=countername,
-                    )
-                    messages.success(request, f'Ticket Successfully Added!', extra_tags='added')
-                    # return redirect('print_ssp_ticket_page', pk=x.csv_id)
-                except IntegrityError:
-                    return HttpResponse("Error occurred. Please try again.")
+                    try:
+                        x = ticket_list.objects.create(
+                            name=name,
+                            csv_id=csv_id,
+                            date_issued=current_date,
+                            valid_until=valid_until,
+                            ticket_family_consult=None,
+                            ticket_family_lab=next_ticket_number,
+                            checkup_type="laboratory",
+                            endorsed_to=endorsed_to,
+                            relationship=relationship,
+                            recepient_type="family",
+                            branch_name=branch_name,
+                        )
+                        messages.success(request, f'Ticket Successfully Added!', extra_tags='added')
+                        return redirect('records_csv_page')
+                        # return redirect('print_ssp_ticket_page', pk=x.csv_id)
+                    except IntegrityError:
+                        return HttpResponse("Error occurred. Please try again.")
             
             elif category == "both":
          
-                last_consultation_ticket = ticket_list.objects.filter(ticket_family_consult__isnull=False).order_by('ticket_family_consult').last()
-                if last_consultation_ticket:
-                    consultation_ticket_number = last_consultation_ticket.ticket_family_consult + 1
-                else:
-                    consultation_ticket_number = 223
+                last_ticket3 = ticket_list.objects.filter(ticket_family_consult__isnull=False, branch_name=branch_name).order_by('ticket_family_consult').last()
+                consultation_ticket_number = last_ticket3.ticket_family_consult + 1 if last_ticket3 else starting_number_consult
 
-                last_laboratory_ticket = ticket_list.objects.filter(ticket_family_lab__isnull=False).order_by('ticket_family_lab').last()
-                if last_laboratory_ticket:
-                    laboratory_ticket_number = last_laboratory_ticket.ticket_family_lab + 1
-                else:
-                    laboratory_ticket_number = 222
+                last_ticket4 = ticket_list.objects.filter(ticket_family_lab__isnull=False, branch_name=branch_name).order_by('ticket_family_lab').last()
+                laboratory_ticket_number = last_ticket4.ticket_family_lab + 1 if last_ticket4 else starting_number_lab
 
-                try:
-                    x = ticket_list.objects.create(
-                        name=name,
-                        csv_id=csv_id,
-                        date_issued=current_date,
-                        valid_until=valid_until,
-                        ticket_family_consult=consultation_ticket_number,
-                        ticket_family_lab=laboratory_ticket_number,
-                        checkup_type="both",
-                        endorsed_to=endorsed_to,
-                        relationship=relationship,
-                        recepient_type="family",
-                        counter_name=countername,
-                    )
-                    messages.success(request, f'Ticket Successfully Added!', extra_tags='added')
-                    # return redirect('print_ssp_ticket_page', pk=x.csv_id)
-                except IntegrityError:
-                    return HttpResponse("Error occurred. Please try again.")
+
+                if duplicates.exists():
+                    messages.error(request, f'This account already has a ticket for this date!',extra_tags='duplicate')
+                    return redirect('records_csv_page')
+                else:
+
+                    try:
+                        x = ticket_list.objects.create(
+                            name=name,
+                            csv_id=csv_id,
+                            date_issued=current_date,
+                            valid_until=valid_until,
+                            ticket_family_consult=consultation_ticket_number,
+                            ticket_family_lab=laboratory_ticket_number,
+                            checkup_type="both",
+                            endorsed_to=endorsed_to,
+                            relationship=relationship,
+                            recepient_type="family",
+                            branch_name=branch_name,
+                        )
+                        messages.success(request, f'Ticket Successfully Added!', extra_tags='added')
+                        return redirect('records_csv_page')
+                        # return redirect('print_ssp_ticket_page', pk=x.csv_id)
+                    except IntegrityError:
+                        return HttpResponse("Error occurred. Please try again.")
 
 
         
@@ -204,85 +257,106 @@ def records_csv_page(request):
             csv_id = request.POST.get("csv_id")
             valid_until = current_date + timedelta(days=30)
 
+
+            starting_number_consult = get_starting_number_consult(branch_name)
+            starting_number_lab = get_starting_number_lab(branch_name)
+
+            duplicates = ticket_list.objects.filter(
+                csv_id=csv_id,
+                branch_name=branch_name,
+                date_issued__year=current_year,
+                date_issued__month=current_month
+            )
+
             # Separate logic for consultation and laboratory tickets
             if category == "consultation":
-                last_ticket = ticket_list.objects.filter(ticket_ssp_consult__isnull=False).order_by('ticket_ssp_consult').last()
-                if last_ticket:
-                    next_ticket_number = last_ticket.ticket_ssp_consult + 1
+              
+                last_ticket = ticket_list.objects.filter(ticket_ssp_consult__isnull=False, branch_name=branch_name).order_by('ticket_ssp_consult').last()
+                next_ticket_number = last_ticket.ticket_ssp_consult + 1 if last_ticket else starting_number_consult
+                
+                if duplicates.exists():
+                    messages.error(request, f'This account already has a ticket for this date!',extra_tags='duplicate')
+                    return redirect('records_csv_page')
+                
                 else:
-                    next_ticket_number = 2910
-                try:
-                    x = ticket_list.objects.create(
-                        name=name,
-                        csv_id=csv_id,
-                        date_issued=current_date,
-                        valid_until=valid_until,
-                        ticket_ssp_consult=next_ticket_number,
-                        ticket_ssp_lab=None,
-                        checkup_type="consultation",
-                        recepient_type="personal",
-                        counter_name=countername,
-                    )
-                    messages.success(request, f'Ticket Successfully Added!', extra_tags='added')
-                    # return redirect('print_ssp_ticket_page', pk=x.csv_id)
-                except IntegrityError:
-                    return HttpResponse("Error occurred. Please try again.")
+                    try:
+                        x = ticket_list.objects.create(
+                            name=name,
+                            csv_id=csv_id,
+                            date_issued=current_date,
+                            valid_until=valid_until,
+                            ticket_ssp_consult=next_ticket_number,
+                            ticket_ssp_lab=None,
+                            checkup_type="consultation",
+                            recepient_type="personal",
+                            branch_name=branch_name,
+                        )
+                        messages.success(request, f'Ticket Successfully Added!', extra_tags='added')
+                        return redirect('records_csv_page')
+                        # return redirect('print_ssp_ticket_page', pk=x.csv_id)
+                    except IntegrityError:
+                        return HttpResponse("Error occurred. Please try again.")
 
             elif category == "laboratory":
-                last_ticket2 = ticket_list.objects.filter(ticket_ssp_lab__isnull=False).order_by('ticket_ssp_lab').last()
-                if last_ticket2:
-                    next_ticket_number = last_ticket2.ticket_ssp_lab + 1
+                last_ticket2 = ticket_list.objects.filter(ticket_ssp_lab__isnull=False, branch_name=branch_name).order_by('ticket_ssp_lab').last()
+                next_ticket_number = last_ticket2.ticket_ssp_lab + 1 if last_ticket2 else starting_number_lab
+
+                if duplicates.exists():
+                    messages.error(request, f'This account already has a ticket for this date!',extra_tags='duplicate')
+                    return redirect('records_csv_page')
+                
                 else:
-                    next_ticket_number = 2685
-                try:
-                    x = ticket_list.objects.create(
-                        name=name,
-                        csv_id=csv_id,
-                        date_issued=current_date,
-                        valid_until=valid_until,
-                        # Set ticket_ssp_consult to None for laboratory
-                        ticket_ssp_consult=None,
-                        ticket_ssp_lab=next_ticket_number,
-                        checkup_type="laboratory",
-                        recepient_type="personal",
-                        counter_name=countername,
-                    )
-                    messages.success(request, f'Ticket Successfully Added!', extra_tags='added')
-                    # return redirect('print_ssp_ticket_page', pk=x.csv_id)
-                except IntegrityError:
-                    return HttpResponse("Error occurred. Please try again.")
+                    try:
+                        x = ticket_list.objects.create(
+                            name=name,
+                            csv_id=csv_id,
+                            date_issued=current_date,
+                            valid_until=valid_until,
+                            # Set ticket_ssp_consult to None for laboratory
+                            ticket_ssp_consult=None,
+                            ticket_ssp_lab=next_ticket_number,
+                            checkup_type="laboratory",
+                            recepient_type="personal",
+                            branch_name=branch_name,
+                        )
+                        messages.success(request, f'Ticket Successfully Added!', extra_tags='added')
+                        return redirect('records_csv_page')
+                        # return redirect('print_ssp_ticket_page', pk=x.csv_id)
+                    except IntegrityError:
+                        return HttpResponse("Error occurred. Please try again.")
             
             
             elif category == "both":
          
-                last_consultation_ticket = ticket_list.objects.filter(ticket_ssp_consult__isnull=False).order_by('ticket_ssp_consult').last()
-                if last_consultation_ticket:
-                    consultation_ticket_number = last_consultation_ticket.ticket_ssp_consult + 1
-                else:
-                    consultation_ticket_number = 2910
+                last_ticket_consult = ticket_list.objects.filter(ticket_ssp_consult__isnull=False, branch_name=branch_name).order_by('ticket_ssp_consult').last()
+                consultation_ticket_number = last_ticket_consult.ticket_ssp_consult + 1 if last_ticket_consult else starting_number_consult
 
-                last_laboratory_ticket = ticket_list.objects.filter(ticket_ssp_lab__isnull=False).order_by('ticket_ssp_lab').last()
-                if last_laboratory_ticket:
-                    laboratory_ticket_number = last_laboratory_ticket.ticket_ssp_lab + 1
-                else:
-                    laboratory_ticket_number = 2685
+                last_ticket_lab = ticket_list.objects.filter(ticket_ssp_lab__isnull=False, branch_name=branch_name).order_by('ticket_ssp_lab').last()
+                laboratory_ticket_number = last_ticket_lab.ticket_ssp_lab + 1 if last_ticket_lab else starting_number_lab
 
-                try:
-                    x = ticket_list.objects.create(
-                        name=name,
-                        csv_id=csv_id,
-                        date_issued=current_date,
-                        valid_until=valid_until,
-                        ticket_ssp_consult=consultation_ticket_number,
-                        ticket_ssp_lab=laboratory_ticket_number,
-                        checkup_type="both",
-                        recepient_type="personal",
-                        counter_name=countername,
-                    )
-                    messages.success(request, f'Ticket Successfully Added!', extra_tags='added')
-                    # return redirect('print_ssp_ticket_page', pk=x.csv_id)
-                except IntegrityError:
-                    return HttpResponse("Error occurred. Please try again.")
+                if duplicates.exists():
+                    messages.error(request, f'This account already has a ticket for this date!',extra_tags='duplicate')
+                    return redirect('records_csv_page')
+                
+                else:
+
+                    try:
+                        x = ticket_list.objects.create(
+                            name=name,
+                            csv_id=csv_id,
+                            date_issued=current_date,
+                            valid_until=valid_until,
+                            ticket_ssp_consult=consultation_ticket_number,
+                            ticket_ssp_lab=laboratory_ticket_number,
+                            checkup_type="both",
+                            recepient_type="personal",
+                            branch_name=branch_name,
+                        )
+                        messages.success(request, f'Ticket Successfully Added!', extra_tags='added')
+                        return redirect('records_csv_page')
+                        # return redirect('print_ssp_ticket_page', pk=x.csv_id)
+                    except IntegrityError:
+                        return HttpResponse("Error occurred. Please try again.")
 
             else:
       
@@ -293,12 +367,22 @@ def records_csv_page(request):
     context = {
         'list_pen': list_pen,
         'ticket_record':ticket_record,
+        'branch_name':branch_name,
         # 'next_ticket_number': next_ticket_number,
     }
+    
+    if not request.user.is_authenticated:
+        return custom_logout(request)
 
     return render(request, 'myapp/records_csv.html', context)
 
-
+@csrf_exempt
+def custom_logout(request):
+    if request.method in ['POST', 'GET']: 
+        logout(request)
+        return HttpResponseRedirect(reverse_lazy('login'))  # Redirect to login page after logout
+    else:
+        return HttpResponseRedirect(reverse_lazy('login'))
 
 
 
@@ -336,8 +420,9 @@ def print_ssp_ticket_page(request, pk):
 def ticket_print(request, pk):
     current_date = date.today()
     current_month = current_date.month
+    current_year = current_date.year
     
-    list_ticket = ticket_list.objects.filter(csv_id=pk,date_issued__month=current_month)
+    list_ticket = ticket_list.objects.filter(csv_id=pk,date_issued__month=current_month,date_issued__year=current_year)
   
     if not list_ticket.exists():
         return render(request, 'myapp/ticket_print_display.html', context={'error': 'Ticket not found.'})
@@ -376,7 +461,7 @@ def fetch_add_successfully(request):
     messages = get_messages(request)
     filtered_messages = [
         {'text': message.message, 'tags': message.tags} for message in messages if 'added' in message.tags
-        or 'breakout' in message.tags or 'breakin' in message.tags
+        or 'breakout' in message.tags or 'breakin' in message.tags or 'duplicate' in message.tags
        
     ]
 
@@ -396,8 +481,9 @@ def fetch_add_successfully(request):
 
 def pensioner_lists(request):
     if request.method == 'GET':
+        branch_name = request.user.username
         # Fetch ticket data from the database
-        tickets = pensioner_list.objects.all().values('id', 'name', 'bank', 'ptype', 'grouping', 'csv_id')
+        tickets = pensioner_list.objects.filter(branch_name=branch_name).values('id', 'name', 'bank', 'ptype', 'grouping', 'csv_id','branch_name')
 
         return JsonResponse(list(tickets), safe=False)
     else:
@@ -419,3 +505,92 @@ def pdf_view(request):
     response = HttpResponse(pdf, content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="example.pdf"'
     return response
+
+
+def table_modal(request):
+    branch_name = request.user.username
+    current_date = date.today()
+    current_month = current_date.month
+    current_year = current_date.year
+
+    attendances = ticket_list.objects.filter(branch_name=branch_name,date_issued__month=current_month,date_issued__year=current_year).order_by('-id').values('id','name', 'date_issued', 'valid_until','ticket_ssp_consult','ticket_ssp_lab','ticket_family_consult','ticket_family_lab')
+
+    # Set the number of items per page
+    paginator = Paginator(attendances, 5)  # 5 items per page
+
+    # Get the page number from the request
+    page = request.GET.get('page', 1)
+
+    try:
+        attendances_page = paginator.page(page)
+    except PageNotAnInteger:
+        attendances_page = paginator.page(1)  # If page is not an integer, deliver the first page
+    except EmptyPage:
+        attendances_page = paginator.page(paginator.num_pages)  # If page is out of range, deliver the last page
+
+    # Convert the page object to a list of dictionaries
+    data = list(attendances_page)
+
+    # Prepare pagination data
+    pagination_data = {
+        'attendances': data,
+        'has_previous': attendances_page.has_previous(),
+        'has_next': attendances_page.has_next(),
+        'page_number': attendances_page.number,
+        'num_pages': paginator.num_pages,
+        'page_range': list(paginator.get_elided_page_range(number=attendances_page.number, on_each_side=2, on_ends=1)),
+    }
+
+    return JsonResponse(pagination_data)
+
+
+
+
+def ticket_modal_lists(request):
+    ID = request.POST.get('data_table_modal_id')
+    try:
+        datalist = ticket_list.objects.get(id=ID)
+        data = {
+            "success": True,
+            'id':datalist.id,
+            "name": datalist.name,
+            "endorsed_to": datalist.endorsed_to,
+            "relationship": datalist.relationship,
+            "date_issued": datalist.date_issued,
+            "valid_until":datalist.valid_until,
+            "checkup_status":datalist.checkup_status,
+            "recepient_type":datalist.recepient_type,
+            "counter_name":datalist.counter_name,
+            "ticket_ssp_consult":datalist.ticket_ssp_consult,
+            "ticket_ssp_lab":datalist.ticket_ssp_lab,
+            "ticket_family_consult":datalist.ticket_family_consult,
+            "ticket_family_lab":datalist.ticket_family_lab,
+     
+        }
+        return JsonResponse(data)
+    except ObjectDoesNotExist:
+        return JsonResponse({'success': False, 'message': 'No records found'})
+    
+
+
+
+def update_table_modal(request):
+    if request.method == "POST":
+        id = request.POST.get("edit_id")
+        name = request.POST.get("edit_names")
+        endorsed_to = request.POST.get("edit_endorsed_to")
+        relationship = request.POST.get("edit_relationship")
+     
+
+        try:
+            ticket_list_save = ticket_list.objects.get(id=id)
+            ticket_list_save.name = name
+            ticket_list_save.endorsed_to = endorsed_to
+            ticket_list_save.relationship = relationship
+        
+
+            ticket_list_save.save()
+            return JsonResponse({'success': True})
+        except ticket_list.DoesNotExist:
+            return JsonResponse({'success': False, 'error_message': f"does not exist."})
+    return JsonResponse({'success': False, 'error_message': 'Invalid request method'})

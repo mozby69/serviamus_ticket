@@ -25,6 +25,8 @@ def login_view(request):
                 login(request, user)
                 if request.user.username == 'admin':
                     return redirect('index')
+                else:
+                    return redirect('index')
 
             
     else:

@@ -15,6 +15,7 @@ class pensioner_list(models.Model):
     grouping = models.CharField(max_length=100,null=True,blank=True)
     conmonth = models.CharField(max_length=100,null=True,blank=True)
     readyx = models.CharField(max_length=200,null=True,blank=True)
+    branch_name = models.CharField(max_length=100,null=True,blank=True)
 
     class Meta:
         db_table = "pensioner_list"
@@ -33,7 +34,7 @@ class ticket_list(models.Model):
     checkup_status = models.CharField(max_length=200,default="PENDING CHECKUP")
     checkup_type = models.CharField(max_length=100,null=True,blank=True)
     recepient_type = models.CharField(max_length=100,null=True,blank=True)
-    counter_name = models.CharField(max_length=100,null=True,blank=True)
+    branch_name = models.CharField(max_length=100,null=True,blank=True)
 
 
     
@@ -50,4 +51,5 @@ class ticket_list(models.Model):
 class import_history(models.Model):
     import_date = models.DateField(max_length=20,null=True,blank=True)
     file_name = models.CharField(max_length=200,null=True,blank=True)
+    branch_name = models.CharField(max_length=100,null=True,blank=True)
 

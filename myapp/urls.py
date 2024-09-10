@@ -1,6 +1,6 @@
 from . import views
 from django.urls import path
-from .app_views import index ,import_page,records_csv,ticket_done,summary_report
+from .app_views import index ,import_page,records_csv,ticket_done,summary_report,import_dbf
 
 
 urlpatterns = [
@@ -26,4 +26,9 @@ urlpatterns = [
     path('pensioner_lists/',records_csv.pensioner_lists,name="pensioner_lists"),
     path('summary_page/',summary_report.summary_page, name="summary_page"),
     path('pensioner_lists_summary/',summary_report.pensioner_lists_summary,name="pensioner_lists_summary"),
+    path('table_modal/',records_csv.table_modal, name="table_modal"),
+    path('ajax_import_table/',import_page.ajax_import_table,name="ajax_import_table"),
+    path('ticket_modal_lists/',records_csv.ticket_modal_lists,name="ticket_modal_lists"),
+    path('update_table_modal/',records_csv.update_table_modal,name="update_table_modal"),
+    path('dbf_page/',import_dbf.dbf_page,name="dbf_page"),
     ]

@@ -9,7 +9,7 @@
 
 <script src="{% static 'js/modals.js' %}"></script>
 
-
+<link href="{% static 'css/aos.css'%}" rel="stylesheet">
 
 <style>
 .records-container{
@@ -40,11 +40,51 @@
     display: flex;
     gap:1.4rem;
   }
+
+
+
+
+.pagination-controls {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pagination-btn {
+    margin: 0 5px;
+    padding: 3px 8px;
+    cursor: pointer;
+    border:none;
+}
+
+.pagination-btn.active {
+    background-color: #5EA061;
+    color: white;
+    border: 1px solid #5EA061;
+}
+
+.pagination-btn.disabled {
+    background-color: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+    border: 1px solid #e9ecef;
+}
+
+.pagination-ellipsis {
+    margin: 0 5px;
+    color: #6c757d;
+}
+
 </style>
 
 
-<div class="records-container">
-    <h4 style="color:#5EA061;font-weight:600;font-size:1.8rem;margin-bottom:2rem;">Pensioner List</h4>
+<div class="records-container" data-aos="fade-up" data-aos-duration="750">
+  <div style="display:flex;justify-content:space-between;">
+    <div><h3 style="color:#5EA061;font-weight:600;margin-bottom:2rem;">PENSIONER LIST</h3></div>
+    <div><h3 style="color:#5EA061;font-weight:600;">{{ branch_name }}</h3></div>
+    <div><button class="btn btn-success" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">Ticket List</button></div>
+  </div>
+
+
     <div class="table-container card">
         <div class="card-body">
             <div class="table-responsive">
@@ -77,11 +117,74 @@
                   </div>
                   
                   
-                  </div>
-                  </div>
-                  
+        </div>
+
+
+
+
+
+
+
+          
+        </div>
+        
 
         
+
+
+
+
+
+{% comment %} modal ticket list {% endcomment %}
+    <div class="offcanvas offcanvas-start" data-bs-scroll="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasWithBothOptionsLabel">Ticket List</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+
+
+
+        <div class="table-container card">
+          <div class="card-body">
+              <div class="table-responsive">
+                {% comment %} <input id="myInput" type="text" placeholder="Search.." style="margin-bottom:1.2rem;float:right;"> {% endcomment %}
+                  <table id="defaultdatatable2" class="table table-bordered table-hover table-striped tables" style="font-size:.7rem;">
+                    <thead class="table-success" style="text-align:center;vertical-align:middle;">
+                    <tr>
+                        <th>NAME</th>
+                        <th>DATE ISSUED</th>
+                        <th>ACTION</th>
+                  
+                    </tr>
+                </thead>
+                <tbody>
+                
+                </tbody>
+                       
+                        </tbody>
+                        </table>
+                        <div id="pagination-controls" class="pagination-controls"></div>
+
+                      </div>
+                    </div>
+                           
+                    
+          </div>
+  
+
+      </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
 
 
 <!-- modal VIEW -->
@@ -294,6 +397,260 @@
 
 
 
+
+
+
+   <!-- modal VIEW canvas -->
+   <div class="modal fade" id="moda_ticket_list" tabindex="-1" aria-labelledby="moda_ticket_list" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <form action="" method="post" id="familyForm" >
+        {% csrf_token %}
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" style="font-weight:700;">SSP DETAILS</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+
+
+    
+            <div class="container">
+
+              <div class="flex-container">
+
+    
+
+
+                <div class="flex-item d-flex">
+                  <span id="field_details">NAME: &nbsp;</span><h6 class="view_namess mt-1"></h6>
+                </div>
+
+                <div class="flex-item d-flex">
+                  <span id="field_details">ENDORSE TO: &nbsp;</span><h6 id="view_endorsed_to" class="mt-1"></h6>
+                </div>
+                
+                <div class="flex-item d-flex">
+                  <span id="field_details">RELATIONSHIP: &nbsp;</span><h6 id="view_relationship" class="mt-1"></h6>
+                </div>
+
+                <div class="flex-item d-flex">
+                  <span id="field_details">DATE ISSUED: &nbsp;</span><h6 id="view_date_issued" class="mt-1"></h6>
+                </div>
+
+                <div class="flex-item d-flex">
+                  <span id="field_details">VALID UNTIL: &nbsp;</span><h6 id="view_valid_until" class="mt-1"></h6>
+                </div>
+
+                <div class="flex-item d-flex">
+                  <span id="field_details">CHECKUP STATUS: &nbsp;</span><h6 id="view_checkup_status" class="mt-1"></h6>
+                </div>
+
+                <div class="flex-item d-flex">
+                  <span id="field_details">RECEPIENT TYPE: &nbsp;</span><h6 id="view_recepient_type" class="mt-1"></h6>
+                </div>
+
+                <div class="flex-item d-flex">
+                  <span id="field_details">BRANCH NAME: &nbsp;</span><h6 id="view_counter_name" class="mt-1"></h6>
+                </div>
+
+                <div class="flex-item d-flex">
+               <div id="ticket_display"></div>
+                </div>
+
+              </div>
+              
+              
+
+            </div>
+
+          </div>
+          <div class="modal-footer">
+
+
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </form>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   <!-- modal edit canvas -->
+   <div class="modal fade" id="modal_ticket_edit_list" tabindex="-1" aria-labelledby="modal_ticket_edit_list" aria-hidden="true">
+    <div class="modal-dialog">
+      <form action="" method="post" class="update_ssp_modal" >
+        {% csrf_token %}
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" style="font-weight:700;">EDIT SSP DETAILS</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+
+
+ 
+
+    
+                <div class="flex-edit d-flex" style="display:none;">
+                 <input type="text" class="edit_id mt-1" name="edit_id" hidden>
+                </div>
+
+                <div class="">
+                  <label for="edit_names" class="form-label" style="font-weight:bold;">NAME:</label>
+                 <input type="text" class="edit_names mt-1 form-control" name="edit_names" readonly>
+                </div>
+
+                <div class="mt-3">
+                  <label for="edit_endorsed_to" class="form-label" style="font-weight:bold;">ENDORSED TO:</label>
+                  <input type="text" class="edit_endorsed_to form-control" name="edit_endorsed_to">
+                </div>
+                
+                <div class="mt-3">
+                  <label for="edit_relationship" class="form-label" style="font-weight:bold;">RELATIONSHIP:</label>
+                 <input type="text" class="edit_relationship form-control" name="edit_relationship">
+                </div>
+
+              
+
+             
+              
+              
+
+
+          </div>
+          <div class="modal-footer">
+
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </form>
+    </div>
+</div>
+
+
+
+<script src="{% static 'js/aos.js' %}"></script>
+<script>
+    AOS.init();
+
+  </script>
+
+<script>
+  var offcanvas = document.getElementById('offcanvasWithBothOptions');
+  offcanvas.style.width = '550px';
+</script>
+
+
+<script>
+
+  function display_realtime(page = 1) {
+    $.ajax({
+        url: '{% url "table_modal" %}',
+        type: 'GET',
+        dataType: 'json',
+        data: { page: page },  // Pass the page number as a query parameter
+        success: function (data) {
+            var tableBody = $('#defaultdatatable2 tbody');
+            tableBody.empty(); // Clear existing table data
+
+            // Populate table rows with data
+            data.attendances.forEach(function (attendance) {
+                var row = $('<tr>');
+                row.append('<td>' + (attendance.name || '') + '</td>');
+                row.append('<td>' + formatDate(attendance.date_issued || '') + '</td>');
+                row.append('<td>' +
+                  '<a style="margin-right:.4rem;" class="material-symbols-outlined btn btn-success btn_table_modal_ticket" ' +
+                  'data-table-modal-id="' + attendance.id + '" ' +
+                  'data-ticket-ssp-consult="' + (attendance.ticket_ssp_consult || '') + '" ' +
+                  'data-ticket-ssp-lab="' + (attendance.ticket_ssp_lab || '') + '" ' +
+                  'data-ticket-family-consult="' + (attendance.ticket_family_consult || '') + '" ' +
+                  'data-ticket-family-lab="' + (attendance.ticket_family_lab || '') + '">' +
+                  'wysiwyg</a>' +
+                  '<a style="margin-right:.4rem;" class="material-symbols-outlined btn btn-primary btn_table_modal_edit" data-table-modal-id="' + attendance.id + '">edit_square</a>' +
+                  '</td>');
+              
+                
+                
+                tableBody.append(row);
+            });
+
+            // Update pagination controls
+            updatePaginationControls(data);
+        },
+        error: function (error) {
+            console.error('Error fetching attendance data:', error);
+        }
+    });
+}
+
+function updatePaginationControls(data) {
+    var paginationControls = $('#pagination-controls');
+    paginationControls.empty(); // Clear existing pagination controls
+
+    // Add 'First' and 'Previous' buttons
+    if (data.has_previous) {
+        paginationControls.append('<button class="pagination-btn" onclick="display_realtime(1)">«</button>');
+        paginationControls.append('<button class="pagination-btn" onclick="display_realtime(' + (data.page_number - 1) + ')">‹</button>');
+    } else {
+        paginationControls.append('<button class="pagination-btn disabled">«</button>');
+        paginationControls.append('<button class="pagination-btn disabled">‹</button>');
+    }
+
+    // Page numbers
+    data.page_range.forEach(function(page) {
+        if (page === data.page_number) {
+            paginationControls.append('<button class="pagination-btn active">' + page + '</button>');
+        } else if (page === '...') {
+            paginationControls.append('<span class="pagination-ellipsis">...</span>');
+        } else {
+            paginationControls.append('<button class="pagination-btn" onclick="display_realtime(' + page + ')">' + page + '</button>');
+        }
+    });
+
+    // Add 'Next' and 'Last' buttons
+    if (data.has_next) {
+        paginationControls.append('<button class="pagination-btn" onclick="display_realtime(' + (data.page_number + 1) + ')">›</button>');
+        paginationControls.append('<button class="pagination-btn" onclick="display_realtime(' + data.num_pages + ')">»</button>');
+    } else {
+        paginationControls.append('<button class="pagination-btn disabled">›</button>');
+        paginationControls.append('<button class="pagination-btn disabled">»</button>');
+    }
+}
+
+
+display_realtime();
+
+// setInterval(display_realtime, 800); 
+
+function formatDate(dateStr) {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', options);
+}
+</script>
+
+
+
+
 <script>
   $(document).ready(function() {
       fetchTickets();  // Fetch data via AJAX when the document is ready
@@ -321,10 +678,10 @@
                       row.append('<td class="align-middle">' +
                           '<a style="margin-right:.4rem;" class="material-symbols-outlined btn btn-success btn_ssp_view" data-ssp-id="' + ticket.id + '">wysiwyg</a>' +
                           '<div class="dropdown d-inline-block dropend">' +
-                              '<a class="btn btn-primary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Print</a>' +
+                              '<a class="btn btn-primary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Add</a>' +
                               '<ul class="dropdown-menu border-1 mt-0 shadow-sm">' +
-                                  '<li><a class="dropdown-item btn_personal_checkup" data-ssp-id="' + ticket.csv_id + '">For Personal Checkup</a></li>' +
-                                  '<li><a class="dropdown-item btn_family_checkup" data-ssp-id="' + ticket.csv_id + '">For Family Checkup</a></li>' +
+                                  '<li><a class="dropdown-item btn_personal_checkup" data-ssp-id="' + ticket.csv_id + '" data-branch-name="' + ticket.branch_name + '">For Personal Checkup</a></li>' +
+                                  '<li><a class="dropdown-item btn_family_checkup" data-ssp-id="' + ticket.csv_id + '" data-branch-name="' + ticket.branch_name + '">For Family Checkup</a></li>' +
                                   '<li><a class="dropdown-item" href="/ticket_print/' + ticket.csv_id + '/" target="_blank">View ticket</a></li>' +
                               '</ul>' +
                           '</div>' +
@@ -484,7 +841,13 @@
                         icon: 'success',          
                     });                                     
                 }
-
+                else if (message.tags.includes('duplicate')) {
+                  swal.fire({
+                      title: "Ticket already exist",
+                      text: message.text,                                                                  
+                      icon: 'warning',          
+                  });                                     
+              }
                
                 else {
                     swal.fire({
@@ -498,9 +861,7 @@
         error: function(error) {
             console.error('Error fetching messages:', error);
         },
-        complete: function() {
-            setTimeout(fetch_import_successful, 1200);
-        }
+    
     });
 }
 

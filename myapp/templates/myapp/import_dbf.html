@@ -1,0 +1,27 @@
+
+{% extends "myapp/base.html" %}
+{% load static %}
+{% block content %}
+
+{% include 'myapp/navbar.html' %}
+
+
+
+
+<h1>DBF to SQL</h1>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label for="dbf_file">DBF File:</label>
+    <input type="file" name="dbf_file" required><br><br>
+
+    <label for="fpt_file">FPT Memo File:</label>
+    <input type="file" name="fpt_file" required><br><br>
+
+    <button type="submit">Upload</button>
+</form>
+
+
+
+
+{% endblock content  %}

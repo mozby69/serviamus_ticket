@@ -13,25 +13,32 @@
       <div class="collapse navbar-collapse" id="navbarNavDropdown">
         <ul class="navbar-nav ms-auto">
 
+          {% comment %} {% if user.username == 'admin' or user.username == 'RLC_SINGCANG' or user.username == 'FCH-BACOLOD'%} {% endcomment %}
+
           <li class="nav-item">
             <a class="nav-link active text-white" aria-current="page" href="{% url 'import' %}">Import Data</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link active text-white" aria-current="page" href="{% url 'dbf_page' %}">Import DBF</a>
           </li>
 
           <li class="nav-item">
             <a class="nav-link active text-white" aria-current="page" href="{% url 'records_csv_page' %}">Records</a>
           </li>
 
-
-          <li class="nav-item">
-            <a class="nav-link active text-white" aria-current="page" href="{% url 'ticket_done_page' %}">Ticket list</a>
-          </li>
-
           <li class="nav-item">
             <a class="nav-link active text-white" aria-current="page" href="{% url 'summary_page' %}" target="_blank">Report</a>
           </li>
 
+          {% comment %} {% endif %} {% endcomment %}
 
-
+{% comment %} 
+          {% if user.username == 'serviamus_admin' or user.username == 'admin' %} {% endcomment %}
+          <li class="nav-item">
+            <a class="nav-link active text-white" aria-current="page" href="{% url 'ticket_done_page' %}">Ticket list</a>
+          </li>
+          {% comment %} {% endif %} {% endcomment %}
 
 
 
