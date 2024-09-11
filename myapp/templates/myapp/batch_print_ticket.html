@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch Print Tickets</title>
+</head>
+<body>
+    <h1>Batch Ticket Print</h1>
+<!-- print_tickets.html -->
+
+{% if tickets %}
+    {% for ticket in tickets %}
+        <div class="ticket">
+            <h2>Ticket for {{ ticket.name }}</h2>
+            <p>CSV ID: {{ ticket.csv_id }}</p>
+            <p>Branch Name: {{ ticket.branch_name }}</p>
+            <!-- Add more ticket details here -->
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No tickets available.</p>
+{% endif %}
+
+
+</body>
+</html>

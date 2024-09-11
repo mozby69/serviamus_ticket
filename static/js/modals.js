@@ -269,7 +269,7 @@ $(document).ready(function() {
                     $("#view_valid_until").text(formatDate(data.valid_until));
                     $("#view_checkup_status").text(data.checkup_status);
                     $("#view_recepient_type").text(data.recepient_type);
-                    $("#view_counter_name").text(data.counter_name);
+                    $("#view_counter_name").text(data.branch_name);
                     $("#moda_ticket_list").modal('show');
                     $("#ticket_display").html(ticketDisplay);
 

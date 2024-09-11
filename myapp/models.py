@@ -52,4 +52,6 @@ class import_history(models.Model):
     import_date = models.DateField(max_length=20,null=True,blank=True)
     file_name = models.CharField(max_length=200,null=True,blank=True)
     branch_name = models.CharField(max_length=100,null=True,blank=True)
+    dbf_file = models.CharField(max_length=200,null=True,blank=True)
+    fpt_file = models.CharField(max_length=200,null=True,blank=True)
 

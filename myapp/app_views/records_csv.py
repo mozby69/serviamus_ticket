@@ -20,7 +20,7 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.contrib.auth import logout
 from django.db.models import Count
 from django.urls import reverse_lazy
-
+import json
 
 def view_ssp(request):
     past_ssp_id = request.POST.get('past_ssp_id')
@@ -38,6 +38,7 @@ def view_ssp(request):
             "status": datalist.status,
             "grouping": datalist.grouping,
             "conmonth": datalist.conmonth,
+            "branch_name":datalist.branch_name,
         }
         return JsonResponse(data)
     except ObjectDoesNotExist:
@@ -417,12 +418,12 @@ def print_ssp_ticket_page(request, pk):
     }
     return render(request, 'myapp/print_ssp_ticket.html', context)
 
-def ticket_print(request, pk):
+def ticket_print(request, pk,branch_name):
     current_date = date.today()
     current_month = current_date.month
     current_year = current_date.year
     
-    list_ticket = ticket_list.objects.filter(csv_id=pk,date_issued__month=current_month,date_issued__year=current_year)
+    list_ticket = ticket_list.objects.filter(branch_name=branch_name,csv_id=pk,date_issued__month=current_month,date_issued__year=current_year)
   
     if not list_ticket.exists():
         return render(request, 'myapp/ticket_print_display.html', context={'error': 'Ticket not found.'})
@@ -482,9 +483,11 @@ def fetch_add_successfully(request):
 def pensioner_lists(request):
     if request.method == 'GET':
         branch_name = request.user.username
-        # Fetch ticket data from the database
-        tickets = pensioner_list.objects.filter(branch_name=branch_name).values('id', 'name', 'bank', 'ptype', 'grouping', 'csv_id','branch_name')
 
+        if request.user.username == 'admin':
+            tickets = pensioner_list.objects.values('id', 'name', 'bank', 'ptype', 'grouping', 'csv_id','branch_name')
+        else:
+             tickets = pensioner_list.objects.filter(branch_name=branch_name).values('id', 'name', 'bank', 'ptype', 'grouping', 'csv_id','branch_name')
         return JsonResponse(list(tickets), safe=False)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=400)
@@ -512,13 +515,15 @@ def table_modal(request):
     current_date = date.today()
     current_month = current_date.month
     current_year = current_date.year
+    if request.user.username == 'admin':
+        attendances = ticket_list.objects.filter(date_issued__month=current_month,date_issued__year=current_year).order_by('-id').values('id','name', 'date_issued', 'valid_until','ticket_ssp_consult','ticket_ssp_lab','ticket_family_consult','ticket_family_lab')
+    else:
+        attendances = ticket_list.objects.filter(branch_name=branch_name,date_issued__month=current_month,date_issued__year=current_year).order_by('-id').values('id','name', 'date_issued', 'valid_until','ticket_ssp_consult','ticket_ssp_lab','ticket_family_consult','ticket_family_lab')
 
-    attendances = ticket_list.objects.filter(branch_name=branch_name,date_issued__month=current_month,date_issued__year=current_year).order_by('-id').values('id','name', 'date_issued', 'valid_until','ticket_ssp_consult','ticket_ssp_lab','ticket_family_consult','ticket_family_lab')
 
-    # Set the number of items per page
-    paginator = Paginator(attendances, 5)  # 5 items per page
+    paginator = Paginator(attendances, 3)
 
-    # Get the page number from the request
+
     page = request.GET.get('page', 1)
 
     try:
@@ -543,7 +548,57 @@ def table_modal(request):
 
     return JsonResponse(pagination_data)
 
+#batchprinting
+def table_modal_batch_print(request):
+    branch_name = request.user.username
+    current_date = date.today()
+    current_month = current_date.month
+    current_year = current_date.year
 
+    if request.user.username == 'admin':
+        attendances = ticket_list.objects.filter(date_issued__month=current_month,date_issued__year=current_year).order_by('-id').values('branch_name','csv_id','id','name', 'date_issued', 'valid_until','ticket_ssp_consult','ticket_ssp_lab','ticket_family_consult','ticket_family_lab')
+    else:
+        attendances = ticket_list.objects.filter(branch_name=branch_name,date_issued__month=current_month,date_issued__year=current_year).order_by('-id').values('branch_name','csv_id','id','name', 'date_issued', 'valid_until','ticket_ssp_consult','ticket_ssp_lab','ticket_family_consult','ticket_family_lab')
+
+
+    data = list(attendances)
+
+
+    pagination_data = {
+        'attendances': data,
+    }
+
+    return JsonResponse(pagination_data)
+
+
+# def ticket_print_batch(request):
+ 
+#     csv_ids = request.GET.get('csv_id', '').split(',')
+#     branch_names = request.GET.get('branch_name', '').split(',')
+
+   
+#     tickets = ticket_list.objects.order_by('-id').filter(csv_id__in=csv_ids, branch_name__in=branch_names)
+
+#     if tickets.exists():
+
+#         return render(request, 'myapp/batch_print_ticket.html', {'tickets': tickets})
+#     else:
+#         return render(request, 'error.html', {'message': 'No tickets found'})
+def ticket_print_batch(request):
+    csv_ids = request.GET.get('csv_id', '').split(',')
+    branch_names = request.GET.get('branch_name', '').split(',')
+
+    filtered_tickets = []
+
+    # Ensure that csv_ids and branch_names have the same length
+    if len(csv_ids) == len(branch_names):
+        for csv_id, branch_name in zip(csv_ids, branch_names):
+            # Filter tickets based on csv_id and branch_name
+            tickets = ticket_list.objects.filter(csv_id=csv_id, branch_name=branch_name)
+            filtered_tickets.extend(tickets)
+
+    # Pass tickets to the template for rendering
+    return render(request, 'myapp/batch_print_ticket.html', {'tickets': filtered_tickets})
 
 
 def ticket_modal_lists(request):
@@ -560,7 +615,7 @@ def ticket_modal_lists(request):
             "valid_until":datalist.valid_until,
             "checkup_status":datalist.checkup_status,
             "recepient_type":datalist.recepient_type,
-            "counter_name":datalist.counter_name,
+            "branch_name":datalist.branch_name,
             "ticket_ssp_consult":datalist.ticket_ssp_consult,
             "ticket_ssp_lab":datalist.ticket_ssp_lab,
             "ticket_family_consult":datalist.ticket_family_consult,

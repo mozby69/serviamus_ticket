@@ -5,22 +5,208 @@
 
 {% include 'myapp/navbar.html' %}
 
+<link href="{% static 'css/import.css' %}" rel="stylesheet">
+
+
+<style>
+    .pagination-controls {
+        text-align: center;
+        margin-top: 20px;
+    }
+    
+    .pagination-btn {
+        padding: 5px 10px;
+        margin: 0 2px;
+        border: 1px solid #ddd;
+        background-color: #f9f9f9;
+        cursor: pointer;
+    }
+    
+    .pagination-btn.active {
+        background-color: #55AF5A;
+        color: white;
+    }
+    
+    .pagination-btn.disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+    
+    .pagination-ellipsis {
+        padding: 5px 10px;
+        margin: 0 2px;
+        color: #777;
+    }
+    
+</style>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6" data-aos="fade-up" data-aos-duration="750">
+            <h4 style="color:#5EA061;font-weight:bold;text-align:center;margin-bottom:1.2rem;">IMPORT DBF & FPT FILE</h4>
+            <div class="section1">
+                <div class="upload-container">
+                    <div class="upload-item1">
+                        {% comment %} <img src="{% static 'images/import2.png' %}" id="import_pic" alt="Import"> {% endcomment %}
+                        <lottie-player 
+                        src="{% static 'json/aa2.json' %}" 
+                        background="transparent" 
+                        speed="1.5" 
+                        style="width: 300px; height: 300px" 
+                        direction="1" 
+                        mode="normal" 
+                        loop 
+                        autoplay>
+                    </lottie-player>
+                    
+                    </div>
+                    <div class="upload-item2" style="display: flex; justify-content: center;width: 100%;">
+                        <form method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; align-items: center;">
+                            {% csrf_token %}
+                            <div style="text-align: center;">
+                                <label for="dbf_file">DBF File:</label>
+                                <input type="file" name="dbf_file" accept=".dbf" required><br><br>
+                            </div>
+
+                            <div style="text-align:center;">
+                                <label for="fpt_file">FPT File:</label>
+                                <input type="file" name="fpt_file" accept=".fpt" required><br><br>
+                            </div>
+                            
+                      
+                            <div style="border:none; padding:0; text-align: center;">
+                                <button type="submit" style="margin-top: 10px; margin: 0 auto;border:none;font-weight: bold;" class="btn btn-success">Import</button>
+                            </div>
+                            
+                         
+                        </form>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6" data-aos="fade-up" data-aos-duration="800">
+            <h4 style="color:#5EA061;font-weight:bold;text-align:center;margin-bottom:1.2rem;">SUBMISSION HISTORY</h4>
+            <div class="table-list">
+                <div class="table-container card" style="border:1px solid #5EA061;border-radius:.8rem;">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="defaultdatatables" class="table table-bordered table-hover table-striped tables">
+                                <thead class="table-success">
+                                    <tr>
+                                        <th>IMPORT DATE</th>
+                                        <th>DBF FILE</th>
+                                        <th>FPT FILE</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="myTable">
+                               
+               
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div id="pagination-controls" class="pagination-controls">
+                            <!-- Pagination buttons will be inserted here dynamically via JavaScript -->
+                        </div>
+                    </div>
+
+            
+
+                    
+                </div>
+            </div>
+        </div>
+
+     
+
+
+    </div>
+</div>
+
+
+<script src="{% static 'js/lottie_player.js'%}"></script> 
 
 
 
-<h1>DBF to SQL</h1>
+<script>
 
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    <label for="dbf_file">DBF File:</label>
-    <input type="file" name="dbf_file" required><br><br>
+    $(document).ready(function() {
+        fetchTickets(1); // Load the first page by default
+    });
+    
+    function fetchTickets(page) {
+        $.ajax({
+            url: "{% url 'ajax_import_table_dbf' %}",
+            type: "GET",
+            data: {
+                page: page  // Pass the page number to the server
+            },
+            dataType: "json",
+            beforeSend: function() {
+                $('#myTable').html('<tr class="loading"><td colspan="2">Loading tickets...</td></tr>');
+            },
+            success: function(data) {
+                $('#myTable').empty();
+    
+                // Populate table rows
+                $.each(data.data, function(index, ticket) {
+                    var row = $('<tr>');
+                    row.append('<td>' + ticket.import_date + '</td>');
+                    row.append('<td>' + ticket.dbf_file + '</td>');
+                    row.append('<td>' + ticket.fpt_file + '</td>');
+                    $('#myTable').append(row);
+                });
+    
+                // Update pagination controls
+                updatePaginationControls(data);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error("Error fetching tickets:", textStatus, errorThrown);
+                $('#myTable').html('<tr><td colspan="2">Error fetching tickets.</td></tr>');
+            }
+        });
+    }
+    
+    function updatePaginationControls(data) {
+        var paginationControls = $('#pagination-controls');
+        paginationControls.empty(); // Clear existing pagination controls
+    
+        // Add 'First' and 'Previous' buttons
+        if (data.has_previous) {
+            paginationControls.append('<button class="pagination-btn" onclick="fetchTickets(1)">«</button>');
+            paginationControls.append('<button class="pagination-btn" onclick="fetchTickets(' + (data.page_number - 1) + ')">‹</button>');
+        } else {
+            paginationControls.append('<button class="pagination-btn disabled">«</button>');
+            paginationControls.append('<button class="pagination-btn disabled">‹</button>');
+        }
+    
+        // Page numbers
+        data.page_range.forEach(function(page) {
+            if (page === data.page_number) {
+                paginationControls.append('<button class="pagination-btn active">' + page + '</button>');
+            } else if (page === '...') {
+                paginationControls.append('<span class="pagination-ellipsis">...</span>');
+            } else {
+                paginationControls.append('<button class="pagination-btn" onclick="fetchTickets(' + page + ')">' + page + '</button>');
+            }
+        });
+    
+        // Add 'Next' and 'Last' buttons
+        if (data.has_next) {
+            paginationControls.append('<button class="pagination-btn" onclick="fetchTickets(' + (data.page_number + 1) + ')">›</button>');
+            paginationControls.append('<button class="pagination-btn" onclick="fetchTickets(' + data.num_pages + ')">»</button>');
+        } else {
+            paginationControls.append('<button class="pagination-btn disabled">›</button>');
+            paginationControls.append('<button class="pagination-btn disabled">»</button>');
+        }
+    }
 
-    <label for="fpt_file">FPT Memo File:</label>
-    <input type="file" name="fpt_file" required><br><br>
+    
 
-    <button type="submit">Upload</button>
-</form>
-
+    </script>
 
 
 

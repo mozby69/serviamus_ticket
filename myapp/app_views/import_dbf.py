@@ -7,6 +7,10 @@ import pandas as pd
 from dbfread import DBF
 from myapp.models import pensioner_list, import_history
 from datetime import datetime
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.http import JsonResponse
+
+
 
 def dbf_page(request):
     if request.method == 'POST':
@@ -60,7 +64,7 @@ def dbf_page(request):
                         add1=row.get('ADD1', ''),
                         add2=row.get('ADD2', ''),
                         birth=birth_date,  # Use as is or None
-                        ptype=row.get('PYTYPE', ''),
+                        ptype=row.get('PTYPE', ''),
                         status=row.get('STATUS', ''),
                         grouping=row.get('GROUPING', ''),
                         conmonth=row.get('CONMONTH', ''),
@@ -80,7 +84,8 @@ def dbf_page(request):
             # Record the import in the history
             import_history.objects.create(
                 import_date=datetime.now().date(),
-                file_name=dbf_file.name,
+                dbf_file=dbf_file.name,
+                fpt_file=fpt_file.name,
                 branch_name=branch_name,
             )
 
@@ -97,3 +102,47 @@ def dbf_page(request):
                 os.remove(fpt_file_path)
 
     return render(request, 'myapp/import_dbf.html')
+
+
+def ajax_import_table_dbf(request):
+    if request.method == 'GET':
+        page_number = request.GET.get('page', 1)
+        items_per_page = request.GET.get('items_per_page', 9)
+        branch_name = request.user.username
+        if request.user.username == 'admin':
+            history_list = import_history.objects.order_by('-id').values('import_date', 'dbf_file','fpt_file')
+        else:
+            history_list = import_history.objects.filter(branch_name=branch_name).order_by('-id').values('import_date', 'dbf_file','fpt_file')
+
+        paginator = Paginator(history_list, items_per_page)
+
+        try:
+            page_obj = paginator.page(page_number)
+        except PageNotAnInteger:
+            page_obj = paginator.page(1)
+        except EmptyPage:
+            page_obj = paginator.page(paginator.num_pages)
+
+        # Get page range with ellipsis
+        if paginator.num_pages > 10:
+            if page_obj.number <= 5:
+                page_range = list(range(1, 6)) + ['...'] + [paginator.num_pages]
+            elif page_obj.number >= paginator.num_pages - 4:
+                page_range = [1, '...'] + list(range(paginator.num_pages - 4, paginator.num_pages + 1))
+            else:
+                page_range = [1, '...'] + list(range(page_obj.number - 2, page_obj.number + 3)) + ['...'] + [paginator.num_pages]
+        else:
+            page_range = list(paginator.page_range)
+
+        data = {
+            'data': list(page_obj.object_list),
+            'page_number': page_obj.number,
+            'num_pages': paginator.num_pages,
+            'has_next': page_obj.has_next(),
+            'has_previous': page_obj.has_previous(),
+            'page_range': page_range,
+        }
+
+        return JsonResponse(data)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)

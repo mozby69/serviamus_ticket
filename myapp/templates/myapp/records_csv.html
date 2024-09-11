@@ -74,6 +74,43 @@
     color: #6c757d;
 }
 
+
+input[type="checkbox"] {
+    accent-color: #5EA061; 
+    width: 14px;  /* Set base size */
+    height: 14px; /* Set base size */
+    transform: scale(1.2); /* Scale the checkbox */
+}
+
+.pagination-controls2 {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pagination2-btn {
+    margin: 0 5px;
+    padding: 3px 8px;
+    cursor: pointer;
+    border:none;
+}
+
+.pagination2-btn.active {
+    background-color: #5EA061;
+    color: white;
+    border: 1px solid #5EA061;
+}
+
+.pagination2-btn.disabled {
+    background-color: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+    border: 1px solid #e9ecef;
+}
+
+.pagination2-ellipsis {
+    margin: 0 5px;
+    color: #6c757d;
+}
 </style>
 
 
@@ -171,7 +208,35 @@
                            
                     
           </div>
-  
+
+
+      <!-- BATCH PRINT  -->
+          <h5 class="offcanvas-title mt-5 mb-3" id="offcanvasWithBothOptionsLabel">Batch Print</h5>
+
+          <div class="card-body">
+            <div class="table-responsive">
+              {% comment %} <input id="myInput" type="text" placeholder="Search.." style="margin-bottom:1.2rem;float:right;"> {% endcomment %}
+                <table id="defaultdatatable3" class="table table-bordered table-hover table-striped tables" style="font-size:.7rem;">
+                  <thead class="table-success" style="text-align:center;vertical-align:middle;">
+                  <tr>
+                      <th>NAME</th>
+                      <th>CHECKBOX</th>
+                      
+                
+                  </tr>
+              </thead>
+              <tbody>
+             
+              </tbody>
+                     
+                      </tbody>
+                      </table>
+                      <button class="btn btn-success" name="print" id="print-button">Print</button>
+                      <div id="pagination-controls2" class="pagination-controls2"></div>
+
+                    </div>
+                  </div>
+             
 
       </div>
     </div>
@@ -560,6 +625,133 @@
 </script>
 
 
+<!-- batch printing -->
+<script>
+
+function display_realtime2(page = 1) {
+  
+      $.ajax({
+        url: '{% url "table_modal_batch_print" %}',
+        type: 'GET',
+        dataType: 'json',
+        data: { page: page },
+        success: function (data) {
+            var tableBody = $('#defaultdatatable3 tbody');
+            tableBody.empty(); // Clear existing table data
+
+            data.attendances.forEach(function (attendance) {
+                // Ensure both csv_id and branch_name are included in the checkbox
+                var row = $('<tr>');
+                row.append('<td>' + (attendance.name || '') + '</td>');
+                row.append('<td style="text-align:center;">' +
+                          '<input type="checkbox" class="check-item" ' +
+                          'data-csv-id="' + attendance.csv_id + '" ' +
+                          'data-branch-name="' + attendance.branch_name + '">' + // Make sure branch_name is here
+                          '</td>');
+                tableBody.append(row);
+            });
+
+            updatePaginationControls2(data);
+        },
+        error: function (error) {
+            console.error('Error fetching attendance data:', error);
+        }
+    });
+
+
+}
+
+
+
+
+$('#print-button').click(function () {
+    var selectedTickets = [];
+
+    // Loop through each checked checkbox and get the data attributes
+    $('.check-item:checked').each(function () {
+        var csv_id = $(this).data('csv-id');  // Get csv_id from data attribute
+        var branch_name = $(this).data('branch-name');  // Get branch_name from data attribute
+
+        // Push each selected csv_id and branch_name as an object
+        selectedTickets.push({ csv_id: csv_id, branch_name: branch_name });
+    });
+
+    if (selectedTickets.length > 0) {
+        // Create arrays to store CSV IDs and branch names
+        var csvIds = selectedTickets.map(ticket => ticket.csv_id).join(",");
+        var branchNames = selectedTickets.map(ticket => ticket.branch_name).join(",");
+
+        // Construct the URL with comma-separated values
+        var url = "/ticket_print_batch/?csv_id=" + csvIds + "&branch_name=" + branchNames;
+
+        // Redirect to the batch print page with csv_id and branch_name as query params
+        window.open(url,"_blank")
+    } else {
+        alert("Please select at least one ticket to print!  ");
+    }
+});
+
+
+
+
+function updatePaginationControls2(data) {
+    var paginationControls = $('#pagination-controls2');
+    paginationControls.empty(); // Clear existing pagination controls
+
+
+    if (data.has_previous) {
+        paginationControls.append('<button class="pagination2-btn" onclick="display_realtime2(1)">«</button>');
+        paginationControls.append('<button class="pagination2-btn" onclick="display_realtime2(' + (data.page_number - 1) + ')">‹</button>');
+    } else {
+        paginationControls.append('<button class="pagination2-btn disabled">«</button>');
+        paginationControls.append('<button class="pagination2-btn disabled">‹</button>');
+    }
+
+
+    data.page_range.forEach(function(page) {
+        if (page === data.page_number) {
+            paginationControls.append('<button class="pagination2-btn active">' + page + '</button>');
+        } else if (page === '...') {
+            paginationControls.append('<span class="pagination2-ellipsis">...</span>');
+        } else {
+            paginationControls.append('<button class="pagination2-btn" onclick="display_realtime2(' + page + ')">' + page + '</button>');
+        }
+    });
+
+
+    if (data.has_next) {
+        paginationControls.append('<button class="pagination2-btn" onclick="display_realtime2(' + (data.page_number + 1) + ')">›</button>');
+        paginationControls.append('<button class="pagination2-btn" onclick="display_realtime2(' + data.num_pages + ')">»</button>');
+    } else {
+        paginationControls.append('<button class="pagination2-btn disabled">›</button>');
+        paginationControls.append('<button class="pagination2-btn disabled">»</button>');
+    }
+}
+
+
+display_realtime2();
+
+function formatDate(dateStr) {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', options);
+}
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
 <script>
 
   function display_realtime(page = 1) {
@@ -639,7 +831,7 @@ function updatePaginationControls(data) {
 
 display_realtime();
 
-// setInterval(display_realtime, 800); 
+
 
 function formatDate(dateStr) {
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
@@ -682,7 +874,7 @@ function formatDate(dateStr) {
                               '<ul class="dropdown-menu border-1 mt-0 shadow-sm">' +
                                   '<li><a class="dropdown-item btn_personal_checkup" data-ssp-id="' + ticket.csv_id + '" data-branch-name="' + ticket.branch_name + '">For Personal Checkup</a></li>' +
                                   '<li><a class="dropdown-item btn_family_checkup" data-ssp-id="' + ticket.csv_id + '" data-branch-name="' + ticket.branch_name + '">For Family Checkup</a></li>' +
-                                  '<li><a class="dropdown-item" href="/ticket_print/' + ticket.csv_id + '/" target="_blank">View ticket</a></li>' +
+                                  `<li><a class="dropdown-item" href="/ticket_print/${ticket.csv_id}/${encodeURIComponent(ticket.branch_name)}/" target="_blank">View ticket</a></li>` +
                               '</ul>' +
                           '</div>' +
                       '</td>');

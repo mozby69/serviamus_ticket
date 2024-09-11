@@ -10,7 +10,6 @@ urlpatterns = [
     path('import/',import_page.import_page, name="import"),
     path('fetch_import_successful/', import_page.fetch_import_successful, name="fetch_import_successful"),
     path('records_csv/', records_csv.records_csv_page, name="records_csv_page"),
-
     path('pdf_view/',records_csv.pdf_view, name="pdf_view"),
     path('print_family/<int:pk>/',records_csv.print_family_ticket_page, name="print_family_ticket_page"),
     path('print_ssp_ticket_page/<int:pk>/',records_csv.print_ssp_ticket_page,name="print_ssp_ticket_page"),
@@ -19,7 +18,7 @@ urlpatterns = [
     path('add_family/', records_csv.add_family, name="add_family"),
     path('fetch_tickets/',ticket_done.fetch_tickets, name="fetch_tickets"),
     path('ticket_done_page/',ticket_done.ticket_done_page, name="ticket_done_page"),
-    path('ticket_print/<int:pk>/',records_csv.ticket_print, name="ticket_print"),
+    path('ticket_print/<int:pk>/<str:branch_name>/',records_csv.ticket_print, name="ticket_print"),
     path('ticket_print_fam/<int:pk>/',records_csv.ticket_print_fam,name="ticket_print_fam"),
     path('save_checkup_status/',ticket_done.save_checkup_status, name="save_checkup_status"),
     path('fetch_add_successfully/',records_csv.fetch_add_successfully,name="fetch_add_successfully"),
@@ -31,4 +30,8 @@ urlpatterns = [
     path('ticket_modal_lists/',records_csv.ticket_modal_lists,name="ticket_modal_lists"),
     path('update_table_modal/',records_csv.update_table_modal,name="update_table_modal"),
     path('dbf_page/',import_dbf.dbf_page,name="dbf_page"),
+    path('ajax_import_table_dbf/',import_dbf.ajax_import_table_dbf,name="ajax_import_table_dbf"),
+    path('table_modal_batch_print/',records_csv.table_modal_batch_print,name="table_modal_batch_print"),
+    path('ticket_print_batch/', records_csv.ticket_print_batch, name='ticket_print_batch'),
+   
     ]
